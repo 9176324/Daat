@@ -1,0 +1,20 @@
+#
+# Compiled binaries.
+#
+Build/**
+Debug/**
+
+#
+# Visual Studio files.
+#
+.vs/**
+*.BAT
+*.CMD
+*.VMP
+*.VC.db
+*.VC.opendb
+
+#
+# VS Code files.
+#
+.vscode/**

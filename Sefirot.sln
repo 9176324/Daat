@@ -1,0 +1,99 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Binah", "Projects\Binah\Binah.vcxproj", "{389A3E87-9607-4515-9937-F2C5BAA1E268}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0510A4B1-D68D-472E-AB16-41475D4D63BE} = {0510A4B1-D68D-472E-AB16-41475D4D63BE}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Chesed", "Projects\Chesed\Chesed.vcxproj", "{CB6FEAEC-D2B5-4B5B-8D8A-8D2B0A57C718}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EA081298-8065-43A3-85C4-73B4E1E6BCA7} = {EA081298-8065-43A3-85C4-73B4E1E6BCA7}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Gevurah", "Projects\Gevurah\Gevurah.vcxproj", "{CFDA5888-9D8D-4EFF-90E6-DA739486E10F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EA081298-8065-43A3-85C4-73B4E1E6BCA7} = {EA081298-8065-43A3-85C4-73B4E1E6BCA7}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Hod", "Projects\Hod\Hod.vcxproj", "{A13453AD-BF56-48DA-9B1C-64A241D91636}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EA081298-8065-43A3-85C4-73B4E1E6BCA7} = {EA081298-8065-43A3-85C4-73B4E1E6BCA7}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Kether", "Projects\Kether\Kether.vcxproj", "{EA081298-8065-43A3-85C4-73B4E1E6BCA7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Malkuth", "Projects\Malkuth\Malkuth.vcxproj", "{8D1722D3-E3BC-46CA-8489-684F08E043C3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EA081298-8065-43A3-85C4-73B4E1E6BCA7} = {EA081298-8065-43A3-85C4-73B4E1E6BCA7}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tiferet", "Projects\Tiferet\Tiferet.vcxproj", "{0510A4B1-D68D-472E-AB16-41475D4D63BE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Yesod", "Projects\Yesod\Yesod.vcxproj", "{21474087-05AF-443E-AC3D-610FC0438214}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Include", "Include", "{0BB17AFE-97FB-442A-B80B-027C1B710A97}"
+	ProjectSection(SolutionItems) = preProject
+		Include\CEPluginSDK.h = Include\CEPluginSDK.h
+		Include\defs.h = Include\defs.h
+		Include\devicedefs.h = Include\devicedefs.h
+		Include\dump.h = Include\dump.h
+		Include\log.h = Include\log.h
+		Include\unicode.inc = Include\unicode.inc
+		Include\VMProtectDDK.h = Include\VMProtectDDK.h
+		Include\VMProtectSDK.h = Include\VMProtectSDK.h
+		Include\WARNING.h = Include\WARNING.h
+		Include\wow64.h = Include\wow64.h
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Daat", "Projects\Daat\Daat.vcxproj", "{923B700A-333B-4502-8CE0-1B74E2305FF0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Optimized|x64 = Optimized|x64
+		Optimized|x86 = Optimized|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{389A3E87-9607-4515-9937-F2C5BAA1E268}.Optimized|x64.ActiveCfg = Optimized|x64
+		{389A3E87-9607-4515-9937-F2C5BAA1E268}.Optimized|x64.Build.0 = Optimized|x64
+		{389A3E87-9607-4515-9937-F2C5BAA1E268}.Optimized|x86.ActiveCfg = Optimized|Win32
+		{389A3E87-9607-4515-9937-F2C5BAA1E268}.Optimized|x86.Build.0 = Optimized|Win32
+		{CB6FEAEC-D2B5-4B5B-8D8A-8D2B0A57C718}.Optimized|x64.ActiveCfg = Optimized|x64
+		{CB6FEAEC-D2B5-4B5B-8D8A-8D2B0A57C718}.Optimized|x64.Build.0 = Optimized|x64
+		{CB6FEAEC-D2B5-4B5B-8D8A-8D2B0A57C718}.Optimized|x86.ActiveCfg = Optimized|Win32
+		{CB6FEAEC-D2B5-4B5B-8D8A-8D2B0A57C718}.Optimized|x86.Build.0 = Optimized|Win32
+		{CFDA5888-9D8D-4EFF-90E6-DA739486E10F}.Optimized|x64.ActiveCfg = Optimized|x64
+		{CFDA5888-9D8D-4EFF-90E6-DA739486E10F}.Optimized|x64.Build.0 = Optimized|x64
+		{CFDA5888-9D8D-4EFF-90E6-DA739486E10F}.Optimized|x86.ActiveCfg = Optimized|Win32
+		{CFDA5888-9D8D-4EFF-90E6-DA739486E10F}.Optimized|x86.Build.0 = Optimized|Win32
+		{A13453AD-BF56-48DA-9B1C-64A241D91636}.Optimized|x64.ActiveCfg = Optimized|x64
+		{A13453AD-BF56-48DA-9B1C-64A241D91636}.Optimized|x64.Build.0 = Optimized|x64
+		{A13453AD-BF56-48DA-9B1C-64A241D91636}.Optimized|x86.ActiveCfg = Optimized|Win32
+		{A13453AD-BF56-48DA-9B1C-64A241D91636}.Optimized|x86.Build.0 = Optimized|Win32
+		{EA081298-8065-43A3-85C4-73B4E1E6BCA7}.Optimized|x64.ActiveCfg = Optimized|x64
+		{EA081298-8065-43A3-85C4-73B4E1E6BCA7}.Optimized|x64.Build.0 = Optimized|x64
+		{EA081298-8065-43A3-85C4-73B4E1E6BCA7}.Optimized|x86.ActiveCfg = Optimized|Win32
+		{EA081298-8065-43A3-85C4-73B4E1E6BCA7}.Optimized|x86.Build.0 = Optimized|Win32
+		{8D1722D3-E3BC-46CA-8489-684F08E043C3}.Optimized|x64.ActiveCfg = Optimized|x64
+		{8D1722D3-E3BC-46CA-8489-684F08E043C3}.Optimized|x64.Build.0 = Optimized|x64
+		{8D1722D3-E3BC-46CA-8489-684F08E043C3}.Optimized|x86.ActiveCfg = Optimized|Win32
+		{8D1722D3-E3BC-46CA-8489-684F08E043C3}.Optimized|x86.Build.0 = Optimized|Win32
+		{0510A4B1-D68D-472E-AB16-41475D4D63BE}.Optimized|x64.ActiveCfg = Optimized|x64
+		{0510A4B1-D68D-472E-AB16-41475D4D63BE}.Optimized|x64.Build.0 = Optimized|x64
+		{0510A4B1-D68D-472E-AB16-41475D4D63BE}.Optimized|x86.ActiveCfg = Optimized|Win32
+		{0510A4B1-D68D-472E-AB16-41475D4D63BE}.Optimized|x86.Build.0 = Optimized|Win32
+		{21474087-05AF-443E-AC3D-610FC0438214}.Optimized|x64.ActiveCfg = Optimized|x64
+		{21474087-05AF-443E-AC3D-610FC0438214}.Optimized|x64.Build.0 = Optimized|x64
+		{21474087-05AF-443E-AC3D-610FC0438214}.Optimized|x86.ActiveCfg = Optimized|Win32
+		{21474087-05AF-443E-AC3D-610FC0438214}.Optimized|x86.Build.0 = Optimized|Win32
+		{923B700A-333B-4502-8CE0-1B74E2305FF0}.Optimized|x64.ActiveCfg = Optimized|x64
+		{923B700A-333B-4502-8CE0-1B74E2305FF0}.Optimized|x64.Build.0 = Optimized|x64
+		{923B700A-333B-4502-8CE0-1B74E2305FF0}.Optimized|x86.ActiveCfg = Optimized|Win32
+		{923B700A-333B-4502-8CE0-1B74E2305FF0}.Optimized|x86.Build.0 = Optimized|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
