@@ -627,7 +627,7 @@ resume :
         LEAF_ENTRY __ops_xsetbv, _TEXT$00
         
         mov eax, edx
-        shl rdx, 20h
+        shr rdx, 20h
 
         db 00fh, 001h, 0d1h ; xsetbv
         
