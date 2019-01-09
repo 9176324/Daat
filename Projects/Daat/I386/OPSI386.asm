@@ -730,7 +730,7 @@ resume :
 
     cPublicProc _CaptureSegmentRegisters, 1
     
-        mov ecx, [esp + 8]
+        mov ecx, [esp + 4]
         
         mov RfSegEs [ecx], es
         mov RfSegCs [ecx], cs
@@ -757,7 +757,7 @@ resume :
 
     cPublicProc _CaptureControlRegisters, 1
     
-        mov ecx, [esp + 8]
+        mov ecx, [esp + 4]
         
         mov eax, cr0
         mov RfCr0 [ecx], eax
@@ -780,7 +780,7 @@ resume :
 
     cPublicProc _CaptureDebugRegisters, 1
     
-        mov ecx, [esp + 8]
+        mov ecx, [esp + 4]
         
         mov eax, dr0
         mov RfDr0 [ecx], eax
@@ -807,7 +807,7 @@ resume :
 
     cPublicProc _RestoreDebugRegisters, 1
     
-        mov ecx, [esp + 8]
+        mov ecx, [esp + 4]
         
         mov eax, RfDr0 [ecx]
         mov dr0, eax

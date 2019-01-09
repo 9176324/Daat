@@ -582,7 +582,11 @@ __vmx_entry(
         "[Sefirot] [Daat] secondary control  < %p >\n",
         CurrentBlock->VmxInfo.Secondary.QuadPart);
 
+#ifndef _WIN64
+#else
     CurrentBlock->VmxInfo.Primary.LowPart |= DR_EXITING;
+#endif // !_WIN64
+
     CurrentBlock->VmxInfo.Primary.LowPart |= MSR_BITMAP_ACTIVE;
     CurrentBlock->VmxInfo.Primary.LowPart |= SECONDARY_CONTROLS;
 
@@ -653,7 +657,7 @@ __vmx_entry(
         __vmx_off();
 
         return STATUS_UNSUCCESSFUL;
-}
+    }
 
     return Status;
 }
