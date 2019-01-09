@@ -33,7 +33,7 @@ extern "C" {
         ULONG Data[CPUID_CACHE_SIZE];
     } CPU_FEATURE, *PCPU_FEATURE;
 
-#define FEAT(feature, index, bit) ((((feature).Data[index] >> (bit)) & 1))
+#define FEAT(feature, index, bit) ((((feature)->Data[index]) >> (bit)) & 1)
 
     /* Intel SDM Vol. 2A: Table 3-8.
     * Information Returned by CPUID Instruction */
@@ -82,35 +82,35 @@ extern "C" {
     * Features for CPUID with EAX=01h stored in EDX
     */
 
-#define X86_FEATURE_FPU (feature) FEAT(feature, 1, 0) /* 0x00000001 Floating Point Unit On-Chip */
-#define X86_FEATURE_VME (feature) FEAT(feature, 1, 1) /* 0x00000002 Virtual 8086 Mode Enhancements */
-#define X86_FEATURE_DE (feature) FEAT(feature, 1, 2) /* 0x00000004 Debugging Extensions */
-#define X86_FEATURE_PSE (feature) FEAT(feature, 1, 3) /* 0x00000008 Page Size Extension */
-#define X86_FEATURE_TSC (feature) FEAT(feature, 1, 4) /* 0x00000010 Time Stamp Counter */
-#define X86_FEATURE_MSR (feature) FEAT(feature, 1, 5) /* 0x00000020 RDMSR/WRMSR Instructions */
-#define X86_FEATURE_PAE (feature) FEAT(feature, 1, 6) /* 0x00000040 Physical Address Extension */
-#define X86_FEATURE_MCE (feature) FEAT(feature, 1, 7) /* 0x00000080 Machine Check Exception */
-#define X86_FEATURE_CX8 (feature) FEAT(feature, 1, 8) /* 0x00000100 CMPXCHG8B Instruction */
-#define X86_FEATURE_APIC (feature) FEAT(feature, 1, 9) /* 0x00000200 APIC On-Chip */
-#define X86_FEATURE_SEP (feature) FEAT(feature, 1, 11) /* 0x00000800 SYSENTER/SYSEXIT Instructions */
-#define X86_FEATURE_MTRR (feature) FEAT(feature, 1, 12) /* 0x00001000 Memory Type Range Registers */
-#define X86_FEATURE_PGE (feature) FEAT(feature, 1, 13) /* 0x00002000 Page Global Bit */
-#define X86_FEATURE_MCA (feature) FEAT(feature, 1, 14) /* 0x00004000 Machine Check Architecture */
-#define X86_FEATURE_CMOV (feature) FEAT(feature, 1, 15) /* 0x00008000 Conditional Move Instructions */
-#define X86_FEATURE_PAT (feature) FEAT(feature, 1, 16) /* 0x00010000 Page Attribute Table */
+#define X86_FEATURE_FPU(feature) FEAT(feature, 1, 0) /* 0x00000001 Floating Point Unit On-Chip */
+#define X86_FEATURE_VME(feature) FEAT(feature, 1, 1) /* 0x00000002 Virtual 8086 Mode Enhancements */
+#define X86_FEATURE_DE(feature) FEAT(feature, 1, 2) /* 0x00000004 Debugging Extensions */
+#define X86_FEATURE_PSE(feature) FEAT(feature, 1, 3) /* 0x00000008 Page Size Extension */
+#define X86_FEATURE_TSC(feature) FEAT(feature, 1, 4) /* 0x00000010 Time Stamp Counter */
+#define X86_FEATURE_MSR(feature) FEAT(feature, 1, 5) /* 0x00000020 RDMSR/WRMSR Instructions */
+#define X86_FEATURE_PAE(feature) FEAT(feature, 1, 6) /* 0x00000040 Physical Address Extension */
+#define X86_FEATURE_MCE(feature) FEAT(feature, 1, 7) /* 0x00000080 Machine Check Exception */
+#define X86_FEATURE_CX8(feature) FEAT(feature, 1, 8) /* 0x00000100 CMPXCHG8B Instruction */
+#define X86_FEATURE_APIC(feature) FEAT(feature, 1, 9) /* 0x00000200 APIC On-Chip */
+#define X86_FEATURE_SEP(feature) FEAT(feature, 1, 11) /* 0x00000800 SYSENTER/SYSEXIT Instructions */
+#define X86_FEATURE_MTRR(feature) FEAT(feature, 1, 12) /* 0x00001000 Memory Type Range Registers */
+#define X86_FEATURE_PGE(feature) FEAT(feature, 1, 13) /* 0x00002000 Page Global Bit */
+#define X86_FEATURE_MCA(feature) FEAT(feature, 1, 14) /* 0x00004000 Machine Check Architecture */
+#define X86_FEATURE_CMOV(feature) FEAT(feature, 1, 15) /* 0x00008000 Conditional Move Instructions */
+#define X86_FEATURE_PAT(feature) FEAT(feature, 1, 16) /* 0x00010000 Page Attribute Table */
 #define X86_FEATURE_PSE36(feature) FEAT(feature, 1, 17) /* 0x00020000 36-Bit Page Size Extension */
-#define X86_FEATURE_PSN (feature) FEAT(feature, 1, 18) /* 0x00040000 Processor Serial Number */
+#define X86_FEATURE_PSN(feature) FEAT(feature, 1, 18) /* 0x00040000 Processor Serial Number */
 #define X86_FEATURE_CLFSH(feature) FEAT(feature, 1, 19) /* 0x00080000 CLFLUSH Instruction */
-#define X86_FEATURE_DS (feature) FEAT(feature, 1, 21) /* 0x00200000 Debug Store */
-#define X86_FEATURE_ACPI (feature) FEAT(feature, 1, 22) /* 0x00400000 Thermal Monitor and Software Controlled Clock Facilities */
-#define X86_FEATURE_MMX (feature) FEAT(feature, 1, 23) /* 0x00800000 Intel MMX Technology */
-#define X86_FEATURE_FXSR (feature) FEAT(feature, 1, 24) /* 0x01000000 FXSAVE and FXRSTOR Instructions */
-#define X86_FEATURE_SSE (feature) FEAT(feature, 1, 25) /* 0x02000000 Streaming SIMD Extensions */
-#define X86_FEATURE_SSE2 (feature) FEAT(feature, 1, 26) /* 0x04000000 Streaming SIMD Extensions 2 */
-#define X86_FEATURE_SS (feature) FEAT(feature, 1, 27) /* 0x08000000 Self Snoop */
-#define X86_FEATURE_HTT (feature) FEAT(feature, 1, 28) /* 0x10000000 Max APIC IDs reserved field is Valid */
-#define X86_FEATURE_TM (feature) FEAT(feature, 1, 29) /* 0x20000000 Thermal Monitor */
-#define X86_FEATURE_PBE (feature) FEAT(feature, 1, 31) /* 0x80000000 Pending Break Enable */
+#define X86_FEATURE_DS(feature) FEAT(feature, 1, 21) /* 0x00200000 Debug Store */
+#define X86_FEATURE_ACPI(feature) FEAT(feature, 1, 22) /* 0x00400000 Thermal Monitor and Software Controlled Clock Facilities */
+#define X86_FEATURE_MMX(feature) FEAT(feature, 1, 23) /* 0x00800000 Intel MMX Technology */
+#define X86_FEATURE_FXSR(feature) FEAT(feature, 1, 24) /* 0x01000000 FXSAVE and FXRSTOR Instructions */
+#define X86_FEATURE_SSE(feature) FEAT(feature, 1, 25) /* 0x02000000 Streaming SIMD Extensions */
+#define X86_FEATURE_SSE2(feature) FEAT(feature, 1, 26) /* 0x04000000 Streaming SIMD Extensions 2 */
+#define X86_FEATURE_SS(feature) FEAT(feature, 1, 27) /* 0x08000000 Self Snoop */
+#define X86_FEATURE_HTT(feature) FEAT(feature, 1, 28) /* 0x10000000 Max APIC IDs reserved field is Valid */
+#define X86_FEATURE_TM(feature) FEAT(feature, 1, 29) /* 0x20000000 Thermal Monitor */
+#define X86_FEATURE_PBE(feature) FEAT(feature, 1, 31) /* 0x80000000 Pending Break Enable */
 
     /*
     * Intel SDM Vol. 2A: Table 3-8. Information Returned by CPUID Instruction
@@ -118,33 +118,33 @@ extern "C" {
     * Features for CPUID with EAX=07h, ECX=00h stored in EBX
     */
 
-#define X86_FEATURE_FSGSBASE (feature) FEAT(feature, 2, 0) /* 0x00000001 RDFSBASE/RDGSBASE/WRFSBASE/WRGSBASE supported */
-#define X86_FEATURE_TSC_ADJUST (feature) FEAT(feature, 2, 1) /* 0x00000002 MSR IA32_TSC_ADJUST supported */
-#define X86_FEATURE_SGX (feature) FEAT(feature, 2, 2) /* 0x00000004 Software Guard Extensions */
-#define X86_FEATURE_BMI1 (feature) FEAT(feature, 2, 3) /* 0x00000008 Bit Manipulation Instruction Set 1 */
-#define X86_FEATURE_HLE (feature) FEAT(feature, 2, 4) /* 0x00000010 Transactional Synchronization Extensions */
-#define X86_FEATURE_AVX2 (feature) FEAT(feature, 2, 5) /* 0x00000020 Advanced Vector Extensions 2 */
-#define X86_FEATURE_SMEP (feature) FEAT(feature, 2, 7) /* 0x00000080 Supervisor-Mode Execution Prevention */
-#define X86_FEATURE_BMI2 (feature) FEAT(feature, 2, 8) /* 0x00000100 Bit Manipulation Instruction Set 2 */
-#define X86_FEATURE_INVPCID (feature) FEAT(feature, 2, 10) /* 0x00000400 INVPCID instruction */
-#define X86_FEATURE_RTM (feature) FEAT(feature, 2, 11) /* 0x00000800 Transactional Synchronization Extensions */
-#define X86_FEATURE_RDT_M (feature) FEAT(feature, 2, 12) /* 0x00001000 Resource Director Technology Monitoring */
-#define X86_FEATURE_MPX (feature) FEAT(feature, 2, 14) /* 0x00004000 Memory Protection Extensions */
-#define X86_FEATURE_RDT_A (feature) FEAT(feature, 2, 15) /* 0x00008000 Resource Director Technology Allocation */
-#define X86_FEATURE_AVX512F (feature) FEAT(feature, 2, 16) /* 0x00010000 AVX-512 Foundation */
-#define X86_FEATURE_AVX512DQ (feature) FEAT(feature, 2, 17) /* 0x00020000 AVX-512 Doubleword and Quadword Instructions */
-#define X86_FEATURE_RDSEED (feature) FEAT(feature, 2, 18) /* 0x00040000 RDSEED Instruction */
-#define X86_FEATURE_ADX (feature) FEAT(feature, 2, 19) /* 0x00080000 Multi-Precision Add-Carry Instruction Extensions */
-#define X86_FEATURE_SMAP (feature) FEAT(feature, 2, 20) /* 0x00100000 Supervisor Mode Access Prevention */
-#define X86_FEATURE_AVX512_IFMA (feature) FEAT(feature, 2, 21) /* 0x00200000 AVX-512 Integer Fused Multiply-Add Instructions */
-#define X86_FEATURE_CLFLUSHOPT (feature) FEAT(feature, 2, 23) /* 0x00800000 CLFLUSHOPT Instruction */
-#define X86_FEATURE_CLWB (feature) FEAT(feature, 2, 24) /* 0x01000000 CLWB Instruction */
-#define X86_FEATURE_AVX512PF (feature) FEAT(feature, 2, 26) /* 0x04000000 AVX-512 Prefetch Instructions */
-#define X86_FEATURE_AVX512ER (feature) FEAT(feature, 2, 27) /* 0x08000000 AVX-512 Exponential and Reciprocal Instructions */
-#define X86_FEATURE_AVX512CD (feature) FEAT(feature, 2, 28) /* 0x10000000 AVX-512 Conflict Detection Instructions*/
-#define X86_FEATURE_SHA (feature) FEAT(feature, 2, 29) /* 0x20000000 SHA Extension */
-#define X86_FEATURE_AVX512BW (feature) FEAT(feature, 2, 30) /* 0x40000000 AVX-512 Byte and Word Instructions */
-#define X86_FEATURE_AVX512VL (feature) FEAT(feature, 2, 31) /* 0x80000000 AVX-512 Vector Length Extensions */
+#define X86_FEATURE_FSGSBASE(feature) FEAT(feature, 2, 0) /* 0x00000001 RDFSBASE/RDGSBASE/WRFSBASE/WRGSBASE supported */
+#define X86_FEATURE_TSC_ADJUST(feature) FEAT(feature, 2, 1) /* 0x00000002 MSR IA32_TSC_ADJUST supported */
+#define X86_FEATURE_SGX(feature) FEAT(feature, 2, 2) /* 0x00000004 Software Guard Extensions */
+#define X86_FEATURE_BMI1(feature) FEAT(feature, 2, 3) /* 0x00000008 Bit Manipulation Instruction Set 1 */
+#define X86_FEATURE_HLE(feature) FEAT(feature, 2, 4) /* 0x00000010 Transactional Synchronization Extensions */
+#define X86_FEATURE_AVX2(feature) FEAT(feature, 2, 5) /* 0x00000020 Advanced Vector Extensions 2 */
+#define X86_FEATURE_SMEP(feature) FEAT(feature, 2, 7) /* 0x00000080 Supervisor-Mode Execution Prevention */
+#define X86_FEATURE_BMI2(feature) FEAT(feature, 2, 8) /* 0x00000100 Bit Manipulation Instruction Set 2 */
+#define X86_FEATURE_INVPCID(feature) FEAT(feature, 2, 10) /* 0x00000400 INVPCID instruction */
+#define X86_FEATURE_RTM(feature) FEAT(feature, 2, 11) /* 0x00000800 Transactional Synchronization Extensions */
+#define X86_FEATURE_RDT_M(feature) FEAT(feature, 2, 12) /* 0x00001000 Resource Director Technology Monitoring */
+#define X86_FEATURE_MPX(feature) FEAT(feature, 2, 14) /* 0x00004000 Memory Protection Extensions */
+#define X86_FEATURE_RDT_A(feature) FEAT(feature, 2, 15) /* 0x00008000 Resource Director Technology Allocation */
+#define X86_FEATURE_AVX512F(feature) FEAT(feature, 2, 16) /* 0x00010000 AVX-512 Foundation */
+#define X86_FEATURE_AVX512DQ(feature) FEAT(feature, 2, 17) /* 0x00020000 AVX-512 Doubleword and Quadword Instructions */
+#define X86_FEATURE_RDSEED(feature) FEAT(feature, 2, 18) /* 0x00040000 RDSEED Instruction */
+#define X86_FEATURE_ADX(feature) FEAT(feature, 2, 19) /* 0x00080000 Multi-Precision Add-Carry Instruction Extensions */
+#define X86_FEATURE_SMAP(feature) FEAT(feature, 2, 20) /* 0x00100000 Supervisor Mode Access Prevention */
+#define X86_FEATURE_AVX512_IFMA(feature) FEAT(feature, 2, 21) /* 0x00200000 AVX-512 Integer Fused Multiply-Add Instructions */
+#define X86_FEATURE_CLFLUSHOPT(feature) FEAT(feature, 2, 23) /* 0x00800000 CLFLUSHOPT Instruction */
+#define X86_FEATURE_CLWB(feature) FEAT(feature, 2, 24) /* 0x01000000 CLWB Instruction */
+#define X86_FEATURE_AVX512PF(feature) FEAT(feature, 2, 26) /* 0x04000000 AVX-512 Prefetch Instructions */
+#define X86_FEATURE_AVX512ER(feature) FEAT(feature, 2, 27) /* 0x08000000 AVX-512 Exponential and Reciprocal Instructions */
+#define X86_FEATURE_AVX512CD(feature) FEAT(feature, 2, 28) /* 0x10000000 AVX-512 Conflict Detection Instructions*/
+#define X86_FEATURE_SHA(feature) FEAT(feature, 2, 29) /* 0x20000000 SHA Extension */
+#define X86_FEATURE_AVX512BW(feature) FEAT(feature, 2, 30) /* 0x40000000 AVX-512 Byte and Word Instructions */
+#define X86_FEATURE_AVX512VL(feature) FEAT(feature, 2, 31) /* 0x80000000 AVX-512 Vector Length Extensions */
 
     /*
     * Intel SDM Vol. 2A: Table 3-8. Information Returned by CPUID Instruction
@@ -152,12 +152,12 @@ extern "C" {
     * Features for CPUID with EAX=07h, ECX=00h stored in ECX
     */
 
-#define X86_FEATURE_PREFETCHWT1 (feature) FEAT(feature, 3, 0) /* 0x00000001 PREFETCHWT1 Instruction */
-#define X86_FEATURE_AVX512_VBMI (feature) FEAT(feature, 3, 1) /* 0x00000002 AVX-512 Vector Bit Manipulation Instructions */
-#define X86_FEATURE_UMIP (feature) FEAT(feature, 3, 2) /* 0x00000004 User-Mode Instruction Prevention */
-#define X86_FEATURE_PKU (feature) FEAT(feature, 3, 3) /* 0x00000008 Protection Keys for User-mode pages */
-#define X86_FEATURE_OSPKE (feature) FEAT(feature, 3, 4) /* 0x00000010 PKU enabled by OS */
-#define X86_FEATURE_RDPID (feature) FEAT(feature, 3, 22) /* 0x00400000 RDPID Instruction and IA32_TSC_AUX MSR */
+#define X86_FEATURE_PREFETCHWT1(feature) FEAT(feature, 3, 0) /* 0x00000001 PREFETCHWT1 Instruction */
+#define X86_FEATURE_AVX512_VBMI(feature) FEAT(feature, 3, 1) /* 0x00000002 AVX-512 Vector Bit Manipulation Instructions */
+#define X86_FEATURE_UMIP(feature) FEAT(feature, 3, 2) /* 0x00000004 User-Mode Instruction Prevention */
+#define X86_FEATURE_PKU(feature) FEAT(feature, 3, 3) /* 0x00000008 Protection Keys for User-mode pages */
+#define X86_FEATURE_OSPKE(feature) FEAT(feature, 3, 4) /* 0x00000010 PKU enabled by OS */
+#define X86_FEATURE_RDPID(feature) FEAT(feature, 3, 22) /* 0x00400000 RDPID Instruction and IA32_TSC_AUX MSR */
 
     /*
     * Intel SDM Vol. 2A: Table 3-8. Information Returned by CPUID Instruction
@@ -165,8 +165,8 @@ extern "C" {
     * Features for CPUID with EAX=80000001h stored in ECX
     */
 
-#define X86_FEATURE_LAHF (feature) FEAT(feature, 4, 0) /* 0x00000001 LAHF/SAHF Instructions */
-#define X86_FEATURE_PREFETCHW (feature) FEAT(feature, 4, 8) /* 0x00000100 PREFETCH/PREFETCHW instructions */
+#define X86_FEATURE_LAHF(feature) FEAT(feature, 4, 0) /* 0x00000001 LAHF/SAHF Instructions */
+#define X86_FEATURE_PREFETCHW(feature) FEAT(feature, 4, 8) /* 0x00000100 PREFETCH/PREFETCHW instructions */
 
     /*
     * Intel SDM Vol. 2A: Table 3-8. Information Returned by CPUID Instruction
@@ -174,11 +174,11 @@ extern "C" {
     * Features for CPUID with EAX=80000001h stored in EDX
     */
 
-#define X86_FEATURE_SYSCALL (feature) FEAT(feature, 5, 11) /* 0x00000800 SYSCALL/SYSRET Instructions */
-#define X86_FEATURE_NX (feature) FEAT(feature, 5, 20) /* 0x00100000 No-Execute Bit */
-#define X86_FEATURE_PDPE1GB (feature) FEAT(feature, 5, 26) /* 0x04000000 Gibibyte pages */
-#define X86_FEATURE_RDTSCP (feature) FEAT(feature, 5, 27) /* 0x08000000 RDTSCP Instruction */
-#define X86_FEATURE_EM64T (feature) FEAT(feature, 5, 29) /* 0x20000000 Long Mode */
+#define X86_FEATURE_SYSCALL(feature) FEAT(feature, 5, 11) /* 0x00000800 SYSCALL/SYSRET Instructions */
+#define X86_FEATURE_NX(feature) FEAT(feature, 5, 20) /* 0x00100000 No-Execute Bit */
+#define X86_FEATURE_PDPE1GB(feature) FEAT(feature, 5, 26) /* 0x04000000 Gibibyte pages */
+#define X86_FEATURE_RDTSCP(feature) FEAT(feature, 5, 27) /* 0x08000000 RDTSCP Instruction */
+#define X86_FEATURE_EM64T(feature) FEAT(feature, 5, 29) /* 0x20000000 Long Mode */
 
 #ifndef _WIN64
     typedef struct DECLSPEC_ALIGN(16) _REGISTERS_FRAME {
@@ -755,6 +755,36 @@ extern "C" {
         NTAPI
         RestoreRegisters(
             __in PREGISTERS_FRAME Registers
+        );
+
+    VOID
+        NTAPI
+        CaptureSegment(
+            __out PREGISTERS_FRAME Registers
+        );
+
+    VOID
+        NTAPI
+        CaptureSegmentRegisters(
+            __out PREGISTERS_FRAME Registers
+        );
+
+    VOID
+        NTAPI
+        CaptureControlRegisters(
+            __out PREGISTERS_FRAME Registers
+        );
+
+    VOID
+        NTAPI
+        CaptureDebugRegisters(
+            __out PREGISTERS_FRAME Registers
+        );
+
+    VOID
+        NTAPI
+        RestoreDebugRegisters(
+            __out PREGISTERS_FRAME Registers
         );
 
 #ifdef __cplusplus

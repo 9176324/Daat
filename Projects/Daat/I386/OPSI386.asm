@@ -558,6 +558,35 @@ resume :
 
     stdENDP ___ops_rdtsc
     
+; ULONG64
+;     NTAPI
+;     __ops_rdtscp(
+;         __out PULONG Aux
+;     );
+
+    cPublicProc ___ops_rdtscp, 1
+        
+        mov edi, edi
+
+        push ebp
+        mov ebp, esp
+
+        push esi
+
+        db 00fh, 001h, 0f9h ; rdtscp
+        
+        mov esi, [ebp + 8]
+        mov [esi], ecx
+
+        pop esi
+
+        mov esp, ebp
+        pop ebp
+
+        stdRET ___ops_rdtscp
+
+    stdENDP ___ops_rdtscp
+    
 ; VOID
 ;     NTAPI
 ;     __ops_xsetbv(
@@ -657,41 +686,6 @@ resume :
         pushfd
         pop RfEFlags [ecx]
         
-        mov eax, dr0
-        mov RfDr0 [ecx], eax
-        mov eax, dr1
-        mov RfDr1 [ecx], eax
-        mov eax, dr2
-        mov RfDr2 [ecx], eax
-        mov eax, dr3
-        mov RfDr3 [ecx], eax
-        mov eax, dr6
-        mov RfDr6 [ecx], eax
-        mov eax, dr7
-        mov RfDr7 [ecx], eax
-        
-        mov RfSegEs [ecx], es
-        mov RfSegCs [ecx], cs
-        mov RfSegSs [ecx], ss
-        mov RfSegDs [ecx], ds
-        mov RfSegFs [ecx], fs
-        mov RfSegGs [ecx], gs
-        
-        sldt word ptr RfLdtr [ecx]
-        str word ptr RfTr [ecx]
-        
-        sgdt fword ptr RfGdtr [ecx]
-        sidt fword ptr RfIdtr [ecx]
-        
-        mov eax, cr0
-        mov RfCr0 [ecx], eax
-        mov eax, cr2
-        mov RfCr2 [ecx], eax
-        mov eax, cr3
-        mov RfCr3 [ecx], eax
-        mov eax, cr4
-        mov RfCr4 [ecx], eax
-        
         stdRET _CaptureRegisters
 
     stdENDP _CaptureRegisters
@@ -727,6 +721,110 @@ resume :
         stdRET _RestoreRegisters
 
     stdENDP _RestoreRegisters
+    
+; VOID
+;     NTAPI
+;     CaptureSegmentRegisters(
+;         __out PREGISTERS_FRAME Registers
+;     );
+
+    cPublicProc _CaptureSegmentRegisters, 1
+    
+        mov ecx, [esp + 8]
+        
+        mov RfSegEs [ecx], es
+        mov RfSegCs [ecx], cs
+        mov RfSegSs [ecx], ss
+        mov RfSegDs [ecx], ds
+        mov RfSegFs [ecx], fs
+        mov RfSegGs [ecx], gs
+        
+        sldt word ptr RfLdtr [ecx]
+        str word ptr RfTr [ecx]
+        
+        sgdt fword ptr RfGdtr [ecx]
+        sidt fword ptr RfIdtr [ecx]
+        
+        stdRET _CaptureSegmentRegisters
+
+    stdENDP _CaptureSegmentRegisters
+    
+; VOID
+;     NTAPI
+;     CaptureControlRegisters(
+;         __out PREGISTERS_FRAME Registers
+;     );
+
+    cPublicProc _CaptureControlRegisters, 1
+    
+        mov ecx, [esp + 8]
+        
+        mov eax, cr0
+        mov RfCr0 [ecx], eax
+        mov eax, cr2
+        mov RfCr2 [ecx], eax
+        mov eax, cr3
+        mov RfCr3 [ecx], eax
+        mov eax, cr4
+        mov RfCr4 [ecx], eax
+        
+        stdRET _CaptureControlRegisters
+
+    stdENDP _CaptureControlRegisters
+    
+; VOID
+;     NTAPI
+;     CaptureDebugRegisters(
+;         __out PREGISTERS_FRAME Registers
+;     );
+
+    cPublicProc _CaptureDebugRegisters, 1
+    
+        mov ecx, [esp + 8]
+        
+        mov eax, dr0
+        mov RfDr0 [ecx], eax
+        mov eax, dr1
+        mov RfDr1 [ecx], eax
+        mov eax, dr2
+        mov RfDr2 [ecx], eax
+        mov eax, dr3
+        mov RfDr3 [ecx], eax
+        mov eax, dr6
+        mov RfDr6 [ecx], eax
+        mov eax, dr7
+        mov RfDr7 [ecx], eax
+        
+        stdRET _CaptureDebugRegisters
+
+    stdENDP _CaptureDebugRegisters
+    
+; VOID
+;     NTAPI
+;     RestoreDebugRegisters(
+;         __out PREGISTERS_FRAME Registers
+;     );
+
+    cPublicProc _RestoreDebugRegisters, 1
+    
+        mov ecx, [esp + 8]
+        
+        mov eax, RfDr0 [ecx]
+        mov dr0, eax
+        mov eax, RfDr1 [ecx]
+        mov dr1, eax
+        mov eax, RfDr2 [ecx]
+        mov dr2, eax
+        mov eax, RfDr3 [ecx]
+        mov dr3, eax
+        mov eax, RfDr6 [ecx]
+        mov dr6, eax
+        mov eax, RfDr7 [ecx]
+        mov dr7, eax
+        
+        stdRET _RestoreDebugRegisters
+
+    stdENDP _RestoreDebugRegisters
     
 _TEXT$00    ends
 

@@ -177,7 +177,6 @@ extern "C" {
         HOST_EFER = 0x00002c02,
         HOST_PERF_GLOBAL_CTRL = 0x00002c04,
 
-
         GUEST_RIP = 0x0000681e,
         GUEST_RFLAGS = 0x00006820,
         GUEST_RSP = 0x0000681c,
@@ -249,69 +248,69 @@ extern "C" {
     };
 
     // PIN-BASED CONTROLS
-#define EXT_INTERRUPT_EXITING 0x00000001
-#define NMI_EXITING 0x00000008
-#define VIRTUAL_NMIS 0x00000020
-#define VMX_TIMER_EXITING 0x00000040
-#define PIN_CONTROLS_DEFINED 0x00000069
+#define EXT_INTERRUPT_EXITING                  0x00000001
+#define NMI_EXITING                            0x00000008
+#define VIRTUAL_NMIS                           0x00000020
+#define VMX_TIMER_EXITING                      0x00000040
+#define PIN_CONTROLS_DEFINED                   0x00000069
 
-// Primary CPU Exit CONTROLS
-#define INTERRUPT_WINDOW_EXITING 0x00000004
-#define USE_TSC_OFFSETTING 0x00000008
-#define HLT_EXITING 0x00000080
-#define INVLPG_EXITING 0x00000200
-#define MWAIT_EXITING 0x00000400
-#define RDPMC_EXITING 0x00000800
-#define RDTSC_EXITING 0x00001000
-#define CR3_LOAD_EXITING 0x00008000
-#define CR3_STORE_EXITING 0x00010000
-#define CR8_LOAD_EXITING 0x00080000
-#define CR8_STORE_EXITING 0x00100000
-#define USE_TPR_SHADOW 0x00200000
-#define NMI_WINDOW_EXITING 0x00400000
-#define DR_EXITING 0x00800000
-#define IO_EXITING 0x01000000
-#define IO_BITMAP_ACTIVE 0x02000000
-#define MONITOR_TRAP_FLAG 0x08000000
-#define MSR_BITMAP_ACTIVE 0x10000000
-#define MONITOR_EXITING 0x20000000
-#define PAUSE_EXITING 0x40000000
-#define SECONDARY_CONTROLS 0x80000000
-#define PRIMARY_CONTROLS_DEFINED 0xfbf99e8c
+    // Primary CPU Exit CONTROLS
+#define INTERRUPT_WINDOW_EXITING               0x00000004
+#define USE_TSC_OFFSETTING                     0x00000008
+#define HLT_EXITING                            0x00000080
+#define INVLPG_EXITING                         0x00000200
+#define MWAIT_EXITING                          0x00000400
+#define RDPMC_EXITING                          0x00000800
+#define RDTSC_EXITING                          0x00001000
+#define CR3_LOAD_EXITING                       0x00008000
+#define CR3_STORE_EXITING                      0x00010000
+#define CR8_LOAD_EXITING                       0x00080000
+#define CR8_STORE_EXITING                      0x00100000
+#define USE_TPR_SHADOW                         0x00200000
+#define NMI_WINDOW_EXITING                     0x00400000
+#define DR_EXITING                             0x00800000
+#define IO_EXITING                             0x01000000
+#define IO_BITMAP_ACTIVE                       0x02000000
+#define MONITOR_TRAP_FLAG                      0x08000000
+#define MSR_BITMAP_ACTIVE                      0x10000000
+#define MONITOR_EXITING                        0x20000000
+#define PAUSE_EXITING                          0x40000000
+#define SECONDARY_CONTROLS                     0x80000000
+#define PRIMARY_CONTROLS_DEFINED               0xfbf99e8c
 
-// Secondary CPU Exit CONTROLS
-#define VIRTUALIZE_APIC_ACCESSES 0x00000001
-#define ENABLE_EPT 0x00000002
-#define DESCTAB_EXITING 0x00000004
-#define ENABLE_RDTSCP 0x00000008
-#define VIRTUALIZE_X2APIC 0x00000010
-#define ENABLE_VPID 0x00000020
-#define WBINVD_EXITING 0x00000040
-#define UNRESTRICTED_GUEST 0x00000080
-#define PAUSE_LOOP_EXITING 0x00000400
-#define SECONDARY_CONTROLS_DEFINED 0x000004ff
+    // Secondary CPU Exit CONTROLS
+#define VIRTUALIZE_APIC_ACCESSES               0x00000001
+#define ENABLE_EPT                             0x00000002
+#define DESCTAB_EXITING                        0x00000004
+#define ENABLE_RDTSCP                          0x00000008
+#define VIRTUALIZE_X2APIC                      0x00000010
+#define ENABLE_VPID                            0x00000020
+#define WBINVD_EXITING                         0x00000040
+#define UNRESTRICTED_GUEST                     0x00000080
+#define PAUSE_LOOP_EXITING                     0x00000400
+#define SECONDARY_CONTROLS_DEFINED             0x000004ff
 
-// Exit Controls
-#define EXIT_CONTROL_SAVE_DEBUG_CONTROLS 0x00000004
-#define EXIT_CONTROL_HOST_ADDR_SPACE_SIZE 0x00000200
-#define EXIT_CONTROL_LOAD_PERF_GLOBAL_CTRL 0x00001000
-#define EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT 0x00008000
-#define EXIT_CONTROL_SAVE_PAT 0x00040000
-#define EXIT_CONTROL_LOAD_PAT 0x00080000
-#define EXIT_CONTROL_SAVE_EFER 0x00100000
-#define EXIT_CONTROL_LOAD_EFER 0x00200000
-#define EXIT_CONTROL_SAVE_VMX_TIMER 0x00400000
-#define EXIT_CONTROLS_DEFINED 0x007c9204
+    // Exit Controls
+#define EXIT_CONTROL_SAVE_DEBUG_CONTROLS       0x00000004
+#define EXIT_CONTROL_HOST_ADDR_SPACE_SIZE      0x00000200
+#define EXIT_CONTROL_LOAD_PERF_GLOBAL_CTRL     0x00001000
+#define EXIT_CONTROL_ACKNOWLEDGE_INTERRUPT     0x00008000
+#define EXIT_CONTROL_SAVE_PAT                  0x00040000
+#define EXIT_CONTROL_LOAD_PAT                  0x00080000
+#define EXIT_CONTROL_SAVE_EFER                 0x00100000
+#define EXIT_CONTROL_LOAD_EFER                 0x00200000
+#define EXIT_CONTROL_SAVE_VMX_TIMER            0x00400000
+#define EXIT_CONTROLS_DEFINED                  0x007c9204
 
-// Entry Controls
-#define ENTRY_CONTROL_LOAD_DEBUG_CONTROLS 0x00000004
-#define ENTRY_CONTROL_LONG_MODE_GUEST 0x00000200
-#define ENTRY_CONTROL_ENTRY_TO_SMM 0x00000400
-#define ENTRY_CONTROL_TEAR_DOWN_SMM_MONITOR 0x00000800
-#define ENTRY_CONTROL_LOAD_PERF_GLOBAL_CTRL 0x00002000
-#define ENTRY_CONTROL_LOAD_PAT 0x00004000
-#define ENTRY_CONTROL_LOAD_EFER 0x00008000
-#define ENTRY_CONTROLS_DEFINED 0x0000ee04
+    // Entry Controls
+#define ENTRY_CONTROL_LOAD_DEBUG_CONTROLS      0x00000004
+#define ENTRY_CONTROL_LONG_MODE_GUEST          0x00000200
+#define ENTRY_CONTROL_ENTRY_TO_SMM             0x00000400
+#define ENTRY_CONTROL_TEAR_DOWN_SMM_MONITOR    0x00000800
+#define ENTRY_CONTROL_LOAD_PERF_GLOBAL_CTRL    0x00002000
+#define ENTRY_CONTROL_LOAD_PAT                 0x00004000
+#define ENTRY_CONTROL_LOAD_EFER                0x00008000
+#define ENTRY_CONTROLS_DEFINED                 0x0000ee04
 
  // Intel SDM Vol. 3C: 30.2 Conventions
     typedef enum VMX_RESULT {
@@ -372,17 +371,17 @@ extern "C" {
 #undef CR0_PG
 
     enum {
-        CR0_PE = (1 << 0),
-        CR0_MP = (1 << 1),
-        CR0_EM = (1 << 2),
-        CR0_TS = (1 << 3),
-        CR0_ET = (1 << 4),
-        CR0_NE = (1 << 5),
-        CR0_WP = (1 << 16),
-        CR0_AM = (1 << 18),
-        CR0_NW = (1 << 29),
-        CR0_CD = (1 << 30),
-        CR0_PG = (1U << 31)
+        CR0_PE = (1ULL << 0),
+        CR0_MP = (1ULL << 1),
+        CR0_EM = (1ULL << 2),
+        CR0_TS = (1ULL << 3),
+        CR0_ET = (1ULL << 4),
+        CR0_NE = (1ULL << 5),
+        CR0_WP = (1ULL << 16),
+        CR0_AM = (1ULL << 18),
+        CR0_NW = (1ULL << 29),
+        CR0_CD = (1ULL << 30),
+        CR0_PG = (1ULL << 31)
     };
 
 #undef CR4_VME
@@ -395,39 +394,39 @@ extern "C" {
 #undef CR4_PGE
 
     enum {
-        CR4_VME = (1 << 0),
-        CR4_PVI = (1 << 1),
-        CR4_TSD = (1 << 2),
-        CR4_DE = (1 << 3),
-        CR4_PSE = (1 << 4),
-        CR4_PAE = (1 << 5),
-        CR4_MCE = (1 << 6),
-        CR4_PGE = (1 << 7),
-        CR4_PCE = (1 << 8),
-        CR4_OSFXSR = (1 << 9),
-        CR4_OSXMMEXCPT = (1 << 10),
-        CR4_VMXE = (1 << 13),
-        CR4_SMXE = (1 << 14)
+        CR4_VME = (1ULL << 0),
+        CR4_PVI = (1ULL << 1),
+        CR4_TSD = (1ULL << 2),
+        CR4_DE = (1ULL << 3),
+        CR4_PSE = (1ULL << 4),
+        CR4_PAE = (1ULL << 5),
+        CR4_MCE = (1ULL << 6),
+        CR4_PGE = (1ULL << 7),
+        CR4_PCE = (1ULL << 8),
+        CR4_OSFXSR = (1ULL << 9),
+        CR4_OSXMMEXCPT = (1ULL << 10),
+        CR4_VMXE = (1ULL << 13),
+        CR4_SMXE = (1ULL << 14)
     };
 
     enum {
-        DR6_BD = (1 << 13),
-        DR7_L0 = (1 << 0),
-        DR7_G0 = (1 << 1),
-        DR7_L1 = (1 << 2),
-        DR7_G1 = (1 << 3),
-        DR7_L2 = (1 << 4),
-        DR7_G2 = (1 << 5),
-        DR7_L3 = (1 << 6),
-        DR7_G3 = (1 << 7),
-        DR7_GD = (1 << 13),
+        DR6_BD = (1ULL << 13),
+        DR7_L0 = (1ULL << 0),
+        DR7_G0 = (1ULL << 1),
+        DR7_L1 = (1ULL << 2),
+        DR7_G1 = (1ULL << 3),
+        DR7_L2 = (1ULL << 4),
+        DR7_G2 = (1ULL << 5),
+        DR7_L3 = (1ULL << 6),
+        DR7_G3 = (1ULL << 7),
+        DR7_GD = (1ULL << 13),
     };
-#define    DR6_SETBITS          0xFFFF0FF0
-#define    DR7_SETBITS          (1 << 10)
-#define    HBREAK_ENABLED_MASK  (DR7_L0 | DR7_G0 | \
-                                 DR7_L1 | DR7_G1 | \
-                                 DR7_L2 | DR7_G2 | \
-                                 DR7_L3 | DR7_G3)
+#define DR6_SETBITS 0xFFFF0FF0
+#define DR7_SETBITS (1ULL << 10)
+#define HBREAK_ENABLED_MASK (DR7_L0 | DR7_G0 | \
+                            DR7_L1 | DR7_G1 | \
+                            DR7_L2 | DR7_G2 | \
+                            DR7_L3 | DR7_G3)
 
     /*
     * According to SDM Vol 3B 17.2.6, DR6/7 high 32 bits should only be set to
@@ -641,13 +640,30 @@ extern "C" {
             };
         };
 
-        ULARGE_INTEGER Cr0;
-        ULARGE_INTEGER Cr4;
         ULARGE_INTEGER Pin;
+        ULARGE_INTEGER PinFixed;
+
         ULARGE_INTEGER Primary;
+        ULARGE_INTEGER PrimaryFixed;
+
         ULARGE_INTEGER Secondary;
+        ULARGE_INTEGER SecondaryFixed;
+
         ULARGE_INTEGER Exit;
+        ULARGE_INTEGER ExitFixed;
+
         ULARGE_INTEGER Entry;
+        ULARGE_INTEGER EntryFixed;
+
+        ULARGE_INTEGER Cr0;
+        ULARGE_INTEGER Cr0Fixed;
+        ULARGE_INTEGER Cr0Mask;
+        ULARGE_INTEGER Cr0ReadShadow;
+
+        ULARGE_INTEGER Cr4;
+        ULARGE_INTEGER Cr4Fixed;
+        ULARGE_INTEGER Cr4Mask;
+        ULARGE_INTEGER Cr4ReadShadow;
     }VMX_INFO, *PVMX_INFO;
 
     enum {

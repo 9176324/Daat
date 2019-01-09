@@ -25,27 +25,10 @@
 
 VOID
 NTAPI
-__vm_inject_exception(
-    VOID
-)
-{
-    INTERRUPTION_INFO InterruptionInfo = { 0 };
-
-    InterruptionInfo.Vector = VECTOR_BP;
-    InterruptionInfo.Type = 3;
-    InterruptionInfo.DeliverErrorCode = 0;
-    InterruptionInfo.Valid = 1;
-
-    __vmx_vmwrite_common(VMX_ENTRY_INTERRUPT_INFO, InterruptionInfo.Info);
-}
-
-VOID
-NTAPI
 __vm_null(
     __inout PCCB Block
 )
 {
-    __debugbreak();
 }
 
 VOID
@@ -57,6 +40,11 @@ __vm_cpuid(
     CPUINFO CpuInfo = { 0 };
 
     __ops_cpuid(Block->Registers.Eax, Block->Registers.Ecx, &CpuInfo);
+
+    if (1 == Block->Registers.Eax &&
+        0 == Block->Registers.Ecx) {
+        CpuInfo.Ecx &= ~(1UL << 5);
+    }
 
 #ifndef _WIN64
     Block->Registers.Eax = CpuInfo.Eax;
@@ -77,8 +65,6 @@ __vm_invd(
     __inout PCCB Block
 )
 {
-    __debugbreak();
-
     __ops_invd();
 }
 
@@ -89,8 +75,6 @@ __vm_rdtsc(
 )
 {
     ULARGE_INTEGER Tsc = { 0 };
-
-    __debugbreak();
 
     Tsc.QuadPart = __ops_rdtsc();
 
@@ -109,8 +93,6 @@ __vm_vmx(
     __inout PCCB Block
 )
 {
-    __debugbreak();
-
     Block->GuestState.GuestRFlags |= EFLAGS_ZF | EFLAGS_CF;
 }
 
@@ -122,8 +104,6 @@ __vm_cr_access(
 {
     ULONG_PTR *Cr = NULL;
     ULONG_PTR *GPReg = NULL;
-
-    __debugbreak();
 
     Cr = Block->Registers.Cr + Block->GuestState.Qualification.CR.Number;
     GPReg = Block->Registers.Reg + Block->GuestState.Qualification.CR.GPReg;
@@ -137,10 +117,6 @@ __vm_cr_access(
         // MOV to CR
 
         *Cr = *GPReg;
-
-        __vmx_vmwrite_common(GUEST_CR0, Block->Registers.Cr0);
-        __vmx_vmwrite_common(GUEST_CR3, Block->Registers.Cr3);
-        __vmx_vmwrite_common(GUEST_CR4, Block->Registers.Cr4);
     }
 }
 
@@ -150,121 +126,84 @@ __vm_dr_access(
     __inout PCCB Block
 )
 {
-    __debugbreak();
+    ULONG_PTR * Dr = NULL;
+    ULONG_PTR * GPReg = NULL;
+
+    CaptureDebugRegisters(&Block->Registers);
+
+    __vmx_vmread_common(GUEST_DR7, &Block->Registers.Dr7);
+
+    if (Block->Registers.Dr7 & DR7_GD) {
+        Block->Registers.Dr7 &= ~DR7_GD;
+        Block->Registers.Dr6 |= DR6_BD;
+
+        __vmx_vmwrite_common(GUEST_DR7, Block->Registers.Dr7);
+
+        Block->GuestState.EntryInterruption.Vector = VECTOR_DB;
+        Block->GuestState.EntryInterruption.DeliverErrorCode = 0;
+        Block->GuestState.EntryInterruption.Type = EXCEPTION;
+        Block->GuestState.EntryInterruption.Valid = TRUE;
+
+        Block->GuestState.EntryInterruption.Information &= 0x00000000FFFFFFFF;
+
+        __vmx_vmwrite_common(VMX_ENTRY_INTERRUPT_INFO, Block->GuestState.EntryInterruption.Information);
+    }
+    else {
+        if (4 == Block->GuestState.Qualification.DR.Number ||
+            5 == Block->GuestState.Qualification.DR.Number) {
+            if (CR4_DE == (Block->Registers.Cr4 &CR4_DE)) {
+                Block->GuestState.EntryInterruption.Vector = VECTOR_UD;
+                Block->GuestState.EntryInterruption.DeliverErrorCode = 0;
+                Block->GuestState.EntryInterruption.Type = EXCEPTION;
+                Block->GuestState.EntryInterruption.Valid = TRUE;
+
+                Block->GuestState.EntryInterruption.Information &= 0x00000000FFFFFFFF;
+
+                __vmx_vmwrite_common(VMX_ENTRY_INTERRUPT_INFO, Block->GuestState.EntryInterruption.Information);
+            }
+        }
+        else {
+            Dr = Block->Registers.Dr + Block->GuestState.Qualification.DR.Number;
+            GPReg = Block->Registers.Reg + Block->GuestState.Qualification.CR.GPReg;
+
+            if (0 != Block->GuestState.Qualification.DR.Direction) {
+                // MOV DR -> GPR
+
+                *GPReg = *Dr;
+            }
+            else {
+                // MOV DR <- GPR
+
+                *Dr = *GPReg;
+
+                RestoreDebugRegisters(&Block->Registers);
+            }
+        }
+    }
 }
 
 VOID
 NTAPI
-__vm_io(
+__vm_rdtscp(
     __inout PCCB Block
 )
 {
-    __debugbreak();
-}
+    ULARGE_INTEGER Tsc = { 0 };
+    ULONG Aux = 0;
 
-VOID
-NTAPI
-__vm_msr_read(
-    __inout PCCB Block
-)
-{
-    ULARGE_INTEGER Msr = { 0 };
-
-    switch (Block->Registers.Ecx) {
-    case IA32_SYSENTER_CS: {
-        __vmx_vmread_common(GUEST_SYSENTER_CS, &Msr.QuadPart);
-
-        break;
-    }
-
-    case IA32_SYSENTER_ESP: {
-        __vmx_vmread_common(GUEST_SYSENTER_ESP, &Msr.QuadPart);
-
-        break;
-    }
-
-    case IA32_SYSENTER_EIP: {
-        __vmx_vmread_common(GUEST_SYSENTER_EIP, &Msr.QuadPart);
-
-        break;
-    }
-
-    case IA32_FS_BASE: {
-        __vmx_vmread_common(GUEST_FS_BASE, &Msr.QuadPart);
-
-        break;
-    }
-
-    case IA32_GS_BASE: {
-        __vmx_vmread_common(GUEST_GS_BASE, &Msr.QuadPart);
-
-        break;
-    }
-
-    default: {
-        Msr.QuadPart = __ops_readmsr(Block->Registers.Ecx);
-
-        break;
-    }
-    }
+    Tsc.QuadPart = __ops_rdtscp(&Aux);
 
 #ifndef _WIN64
-    Block->Registers.Eax = Msr.LowPart;
-    Block->Registers.Edx = Msr.HighPart;
+    Block->Registers.Eax = Tsc.LowPart;
+    Block->Registers.Edx = Tsc.HighPart;
+
+    Block->Registers.Ecx = Aux;
 #else
-    Block->Registers.Rax = Msr.LowPart;
-    Block->Registers.Rdx = Msr.HighPart;
+    Block->Registers.Rax = Tsc.LowPart;
+    Block->Registers.Rdx = Tsc.HighPart;
+
+    Block->Registers.Rcx = Aux;
 #endif // !_WIN64
-}
-
-VOID
-NTAPI
-__vm_msr_write(
-    __inout PCCB Block
-)
-{
-    ULARGE_INTEGER Msr = { 0 };
-
-    Msr.LowPart = Block->Registers.Eax;
-    Msr.HighPart = Block->Registers.Edx;
-
-    switch (Block->Registers.Ecx) {
-    case IA32_SYSENTER_CS: {
-        __vmx_vmwrite_common(GUEST_SYSENTER_CS, Msr.QuadPart);
-
-        break;
-    }
-
-    case IA32_SYSENTER_ESP: {
-        __vmx_vmwrite_common(GUEST_SYSENTER_ESP, Msr.QuadPart);
-
-        break;
-    }
-
-    case IA32_SYSENTER_EIP: {
-        __vmx_vmwrite_common(GUEST_SYSENTER_EIP, Msr.QuadPart);
-
-        break;
-    }
-
-    case IA32_FS_BASE: {
-        __vmx_vmwrite_common(GUEST_FS_BASE, Msr.QuadPart);
-
-        break;
-    }
-
-    case IA32_GS_BASE: {
-        __vmx_vmwrite_common(GUEST_GS_BASE, Msr.QuadPart);
-
-        break;
-    }
-
-    default: {
-        __ops_writemsr(Block->Registers.Ecx, Msr.QuadPart);
-
-        break;
-    }
-    }
 }
 
 VOID
@@ -274,8 +213,6 @@ __vm_xsetbv(
 )
 {
     ULARGE_INTEGER Xcr = { 0 };
-
-    __debugbreak();
 
     Xcr.LowPart = Block->Registers.Eax;
     Xcr.HighPart = Block->Registers.Edx;
@@ -300,7 +237,7 @@ PVM_HANDLER Handlers[] = {
     __vm_invd, // [VMX_EXIT_INVD] Guest executed INVD instruction
     __vm_null, // [VMX_EXIT_INVLPG] Guest executed INVLPG instruction
     __vm_null, // [VMX_EXIT_RDPMC] Guest executed RDPMC instruction
-    __vm_null, // __vm_rdtsc, // [VMX_EXIT_RDTSC] Guest executed RDTSC instruction
+    __vm_rdtsc, // [VMX_EXIT_RDTSC] Guest executed RDTSC instruction
     __vm_null, // [VMX_EXIT_RSM] Guest executed RSM instruction in SMM
     __vm_null, // __vm_vmx, // [VMX_EXIT_VMCALL]
     __vm_null, // __vm_vmx, // [VMX_EXIT_VMCLEAR]
@@ -312,11 +249,11 @@ PVM_HANDLER Handlers[] = {
     __vm_null, // __vm_vmx, // [VMX_EXIT_VMWRITE]
     __vm_null, // __vm_vmx, // [VMX_EXIT_VMXOFF]
     __vm_null, // __vm_vmx, // [VMX_EXIT_VMXON]
-    __vm_null, // __vm_cr_access, // [VMX_EXIT_CR_ACCESS] Guest accessed a control register
-    __vm_null, // __vm_dr_access, // [VMX_EXIT_DR_ACCESS] Guest attempted access to debug register
+    __vm_cr_access, // [VMX_EXIT_CR_ACCESS] Guest accessed a control register
+    __vm_dr_access, // [VMX_EXIT_DR_ACCESS] Guest attempted access to debug register
     __vm_null, // __vm_io, // [VMX_EXIT_IO] Guest attempted I/O
-    __vm_msr_read, // [VMX_EXIT_MSR_READ] Guest attempted to read an MSR
-    __vm_msr_write, // [VMX_EXIT_MSR_WRITE] Guest attempted to write an MSR
+    __vm_null, // [VMX_EXIT_MSR_READ] Guest attempted to read an MSR
+    __vm_null, // [VMX_EXIT_MSR_WRITE] Guest attempted to write an MSR
     __vm_null, // [VMX_EXIT_FAILED_VMENTER_GS] VMENTER failed due to guest state
     __vm_null, // [VMX_EXIT_FAILED_VMENTER_MSR] VMENTER failed due to MSR loading
     __vm_null, // [VMX_EXIT_MWAIT]
@@ -331,7 +268,7 @@ PVM_HANDLER Handlers[] = {
     __vm_null, // [VMX_EXIT_EPT_VIOLATION]
     __vm_null, // [VMX_EXIT_EPT_MISCONFIG]
     __vm_null, // [VMX_EXIT_INVEPT]
-    __vm_null, // [VMX_EXIT_RDTSCP]
+    __vm_rdtscp, // [VMX_EXIT_RDTSCP]
     __vm_null, // [VMX_EXIT_VMX_TIMER_EXIT]
     __vm_null, // [VMX_EXIT_INVVPID]
     __vm_null, // [VMX_EXIT_WBINVD]
@@ -359,9 +296,12 @@ __vm_exit_dispatch(
     __vmx_vmread_common(GUEST_RIP, &CurrentBlock->GuestState.GuestRip);
     __vmx_vmread_common(GUEST_RSP, &CurrentBlock->GuestState.GuestRsp);
     __vmx_vmread_common(GUEST_RFLAGS, &CurrentBlock->GuestState.GuestRFlags);
-    __vmx_vmread_common(VM_EXIT_INFO_INSTRUCTION_LENGTH, &CurrentBlock->GuestState.InstructionLength);
     __vmx_vmread_common(VM_EXIT_INFO_REASON, &CurrentBlock->GuestState.Reason);
+    __vmx_vmread_common(VM_EXIT_INFO_INTERRUPT_INFO, &CurrentBlock->GuestState.ExitInterruption);
+    __vmx_vmread_common(VM_EXIT_INFO_IDT_VECTORING, &CurrentBlock->GuestState.IdtVectoring);
     __vmx_vmread_common(VM_EXIT_INFO_QUALIFICATION, &CurrentBlock->GuestState.Qualification);
+    __vmx_vmread_common(VM_EXIT_INFO_INSTRUCTION_LENGTH, &CurrentBlock->GuestState.InstructionLength);
+    __vmx_vmread_common(VM_EXIT_INFO_INSTRUCTION_INFO, &CurrentBlock->GuestState.Instruction);
 
     Handlers[CurrentBlock->GuestState.Reason.BasicReason](CurrentBlock);
 

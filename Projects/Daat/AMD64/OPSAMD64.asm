@@ -19,8 +19,8 @@
 include ksamd64.inc
 include macamd64.inc
 
-        __vmx_entry PROTO Block : PTR
-        __vm_exit_dispatch PROTO ProcessorState : PTR
+        __vmx_entry PROTO Registers : PTR
+        __vm_exit_dispatch PROTO Registers : PTR
 
 RfP1Home EQU 00000h
 RfP2Home EQU 00008h
@@ -616,6 +616,26 @@ resume :
         ret
 
         LEAF_END __ops_rdtsc, _TEXT$00
+        
+; ULONG64
+;     NTAPI
+;     __ops_rdtscp(
+;         __out PULONG Aux
+;     );
+
+        LEAF_ENTRY __ops_rdtscp, _TEXT$00
+        
+        mov r8, rcx
+
+        db 00fh, 001h, 0f9h ; rdtscp
+        
+        mov [r8], rcx
+        shl rdx, 20h
+        or rax, rdx
+
+        ret
+
+        LEAF_END __ops_rdtscp, _TEXT$00
 
 ; VOID
 ;     NTAPI
@@ -729,43 +749,6 @@ resume :
 
         stmxcsr RfMxCsr [rcx]
         
-        mov rax, dr0
-        mov RfDr0 [rcx], rax
-        mov rax, dr1
-        mov RfDr1 [rcx], rax
-        mov rax, dr2
-        mov RfDr2 [rcx], rax
-        mov rax, dr3
-        mov RfDr3 [rcx], rax
-        mov rax, dr6
-        mov RfDr6 [rcx], rax
-        mov rax, dr7
-        mov RfDr7 [rcx], rax
-        
-        mov RfSegEs [rcx], es
-        mov RfSegCs [rcx], cs
-        mov RfSegSs [rcx], ss
-        mov RfSegDs [rcx], ds
-        mov RfSegFs [rcx], fs
-        mov RfSegGs [rcx], gs
-        
-        sldt word ptr RfLdtr [rcx]
-        str word ptr RfTr [rcx]
-        
-        sgdt fword ptr RfGdtr [rcx]
-        sidt fword ptr RfIdtr [rcx]
-        
-        mov rax, cr0
-        mov RfCr0 [rcx], rax
-        mov rax, cr2
-        mov RfCr2 [rcx], rax
-        mov rax, cr3
-        mov RfCr3 [rcx], rax
-        mov rax, cr4
-        mov RfCr4 [rcx], rax
-        mov rax, cr8
-        mov RfCr8 [rcx], rax
-
         ret
         
         LEAF_END CaptureRegisters, _TEXT$00
@@ -827,5 +810,103 @@ resume :
         ret
         
         LEAF_END RestoreRegisters, _TEXT$00
+        
+; VOID
+;     NTAPI
+;     CaptureSegmentRegisters(
+;         __out PREGISTERS_FRAME Registers
+;     );
+
+        LEAF_ENTRY CaptureSegmentRegisters, _TEXT$00
+        
+        mov RfSegEs [rcx], es
+        mov RfSegCs [rcx], cs
+        mov RfSegSs [rcx], ss
+        mov RfSegDs [rcx], ds
+        mov RfSegFs [rcx], fs
+        mov RfSegGs [rcx], gs
+        
+        sldt word ptr RfLdtr [rcx]
+        str word ptr RfTr [rcx]
+        
+        sgdt fword ptr RfGdtr [rcx]
+        sidt fword ptr RfIdtr [rcx]
+        
+        ret
+        
+        LEAF_END CaptureSegmentRegisters, _TEXT$00
+        
+; VOID
+;     NTAPI
+;     CaptureControlRegisters(
+;         __out PREGISTERS_FRAME Registers
+;     );
+
+        LEAF_ENTRY CaptureControlRegisters, _TEXT$00
+        
+        mov rax, cr0
+        mov RfCr0 [rcx], rax
+        mov rax, cr2
+        mov RfCr2 [rcx], rax
+        mov rax, cr3
+        mov RfCr3 [rcx], rax
+        mov rax, cr4
+        mov RfCr4 [rcx], rax
+        mov rax, cr8
+        mov RfCr8 [rcx], rax
+
+        ret
+        
+        LEAF_END CaptureControlRegisters, _TEXT$00
+        
+; VOID
+;     NTAPI
+;     CaptureDebugRegisters(
+;         __out PREGISTERS_FRAME Registers
+;     );
+
+        LEAF_ENTRY CaptureDebugRegisters, _TEXT$00
+        
+        mov rax, dr0
+        mov RfDr0 [rcx], rax
+        mov rax, dr1
+        mov RfDr1 [rcx], rax
+        mov rax, dr2
+        mov RfDr2 [rcx], rax
+        mov rax, dr3
+        mov RfDr3 [rcx], rax
+        mov rax, dr6
+        mov RfDr6 [rcx], rax
+        mov rax, dr7
+        mov RfDr7 [rcx], rax
+        
+        ret
+        
+        LEAF_END CaptureDebugRegisters, _TEXT$00
+        
+; VOID
+;     NTAPI
+;     RestoreDebugRegisters(
+;         __out PREGISTERS_FRAME Registers
+;     );
+
+        LEAF_ENTRY RestoreDebugRegisters, _TEXT$00
+        
+        mov rax, RfDr0 [rcx]
+        mov dr0, rax
+        mov rax, RfDr1 [rcx]
+        mov dr1, rax
+        mov rax, RfDr2 [rcx]
+        mov dr2, rax
+        mov rax, RfDr3 [rcx]
+        mov dr3, rax
+        mov rax, RfDr6 [rcx]
+        mov dr6, rax
+        mov rax, RfDr7 [rcx]
+        mov dr7, rax
+        
+        ret
+        
+        LEAF_END RestoreDebugRegisters, _TEXT$00
         
         end

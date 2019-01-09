@@ -32,16 +32,125 @@ extern "C" {
             __inout PCCB Block
             );
 
+    enum {
+        INTERRUPT = 0,
+        NMI = 2,
+        EXCEPTION = 3,
+        SWINT = 4,
+        PRIV_TRAP = 5,
+        UNPRIV_TRAP = 6,
+        OTHER = 7
+    };
+
+#define NO_ERROR_CODE ~0U
+
+    typedef union _ENTRY_INTERRUPTION {
+        ULONG64 Information;
+
+        struct {
+            ULONG64 Vector : 8;
+            ULONG64 Type : 3;
+            ULONG64 DeliverErrorCode : 1;
+            ULONG64 NOTHING : 19;
+            ULONG64 Valid : 1;
+        };
+    }ENTRY_INTERRUPTION, *PENTRY_INTERRUPTION;
+
     typedef union _REASON {
         struct {
             ULONG64 BasicReason : 16;
-            ULONG64 NOTHING : 12;
-            ULONG64 PendingMtf : 1;
-            ULONG64 ExitRoot : 1;
-            ULONG64 ExitFail : 1;
-            ULONG64 EnterFail : 1;
+            ULONG64 NOTHING : 11;
+
+            // A VM exit saves this bit as 1 to indicate that the VM exit was incident to enclave mode.
+            ULONG64 EnclaveMode : 1;
+            ULONG64 PendingMTF : 1;
+            ULONG64 ExitRoot : 1; // VM exit from VMX root operation
+            ULONG64 NOTHING : 1;
+            ULONG64 EnterFail : 1; // 0 = true VM exit; 1 = VM-entry failure
         };
     }REASON, *PREASON;
+
+    typedef union _EXIT_INTERRUPTION {
+        ULONG64 Information;
+
+        struct {
+            ULONG64 Vector : 8;
+            ULONG64 Type : 3;
+            ULONG64 ErrorCode : 1;
+            ULONG64 NmiUnmasking : 1;
+            ULONG64 NOTHING : 18;
+            ULONG64 Valid : 1;
+        };
+    }EXIT_INTERRUPTION, *PEXIT_INTERRUPTION;
+
+    typedef union _IDT_VECTORING {
+        ULONG64 Information;
+
+        struct {
+            ULONG64 Vector : 8;
+            ULONG64 Type : 3;
+            ULONG64 ErrorCode : 1;
+            ULONG64 Undefined : 1;
+            ULONG64 NOTHING : 18;
+            ULONG64 Valid : 1;
+        };
+    }IDT_VECTORING, *PIDT_VECTORING;
+
+    typedef union _INSTRUCTION {
+        ULONG64 Information;
+
+        struct {
+            union {
+                struct {
+                    ULONG64 Scaling : 2;
+
+                    union {
+                        struct {
+                            ULONG64 NOTHING : 1;
+                            ULONG64 Reg1 : 4;
+                        };
+
+                        ULONG64 DestReg : 4;
+                    };
+                };
+
+                ULONG64 NOTHING : 7;
+            };
+
+            ULONG64 AddrSize : 3;
+
+            union {
+                struct {
+                    ULONG64 MemOrReg : 1;
+                    ULONG64 OpSize : 2;
+                };
+
+                ULONG64 NOTHING : 5;
+            };
+
+            ULONG64 Segment : 3;
+
+            union {
+                struct {
+                    ULONG64 IndexReg : 4;
+                    ULONG64 IndexRegInvalid : 1;
+                    ULONG64 BaseReg : 4;
+                    ULONG64 BaseRegInvalid : 1;
+
+                    union {
+                        struct {
+                            ULONG64 InstructionIdentity : 2;
+                            ULONG64 NOTHING : 2;
+                        };
+
+                        ULONG64 Reg2 : 4;
+                    };
+                };
+
+                ULONG64 NOTHING : 14;
+            };
+        };
+    }INSTRUCTION, *PINSTRUCTION;
 
     typedef union _QUALIFICATION {
         struct {
@@ -95,8 +204,8 @@ extern "C" {
             ULONG64 Writeable : 1;
             ULONG64 Executable : 1;
             ULONG64 NOTHING : 1;
-            ULONG64 gla1 : 1;
-            ULONG64 gla2 : 1;
+            ULONG64 Gla1 : 1;
+            ULONG64 Gla2 : 1;
             ULONG64 NOTHING : 3;  /* bits 11:9 */
             ULONG64 NmiBlock : 1;
             ULONG64 NOTHING : 19;
@@ -104,44 +213,26 @@ extern "C" {
         } EPT;
     }QUALIFICATION, *PQUALIFICATION;
 
-    typedef union _INTERRUPTION_INFO {
-        ULONG64 Info;
-
-        struct {
-            ULONG64 Vector : 8;
-            ULONG64 Type : 3;
-            ULONG64 DeliverErrorCode : 1;
-            ULONG64 NmiUnmasking : 1;
-            ULONG64 NOTHING : 18;
-            ULONG64 Valid : 1;
-        };
-    }INTERRUPTION_INFO, *PINTERRUPTION_INFO;
-
     typedef struct _GUEST_STATE {
         ULONG64 GuestRip;
         ULONG64 GuestRsp;
         ULONG64 GuestRFlags;
-        ULONG64 InstructionLength;
+        ENTRY_INTERRUPTION EntryInterruption;
         REASON Reason;
+        EXIT_INTERRUPTION ExitInterruption;
+        IDT_VECTORING IdtVectoring;
+        INSTRUCTION Instruction;
+        ULONG64 InstructionLength;
         QUALIFICATION Qualification;
+        BOOLEAN Injected;
     } GUEST_STATE, *PGUEST_STATE;
 
     typedef struct _CPUINFO {
-        LONG Eax;
-        LONG Ebx;
-        LONG Ecx;
-        LONG Edx;
+        ULONG Eax;
+        ULONG Ebx;
+        ULONG Ecx;
+        ULONG Edx;
     } CPUINFO, *PCPUINFO;
-
-    enum {
-        INTERRUPT = 0,
-        NMI = 2,
-        EXCEPTION = 3,
-        SWINT = 4,
-        PRIV_TRAP = 5,
-        UNPRIV_TRAP = 6,
-        OTHER = 7
-    };
 
     VOID
         NTAPI
@@ -161,6 +252,12 @@ extern "C" {
         NTAPI
         __ops_rdtsc(
             VOID
+        );
+
+    ULONG64
+        NTAPI
+        __ops_rdtscp(
+            __out PULONG Aux
         );
 
     VOID

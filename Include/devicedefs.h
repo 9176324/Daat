@@ -26,6 +26,9 @@ extern "C" {
 
 #include <devioctl.h>
 
+#define LOADER_DEVICE_STRING L"\\Device\\Daat"
+#define LOADER_SYMBOLIC_STRING L"\\DosDevices\\Daat"
+
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */
