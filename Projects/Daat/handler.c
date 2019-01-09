@@ -29,6 +29,7 @@ __vm_null(
     __inout PCCB Block
 )
 {
+
 }
 
 VOID
@@ -39,7 +40,10 @@ __vm_cpuid(
 {
     CPUINFO CpuInfo = { 0 };
 
-    __ops_cpuid(Block->Registers.Eax, Block->Registers.Ecx, &CpuInfo);
+    __ops_cpuid(
+        Block->Registers.Eax, 
+        Block->Registers.Ecx, 
+        &CpuInfo);
 
     if (1 == Block->Registers.Eax &&
         0 == Block->Registers.Ecx) {
@@ -105,6 +109,8 @@ __vm_cr_access(
     ULONG_PTR *Cr = NULL;
     ULONG_PTR *GPReg = NULL;
 
+    __vmx_vmread_common(VM_EXIT_INFO_QUALIFICATION, &Block->GuestState.Qualification);
+
     Cr = Block->Registers.Cr + Block->GuestState.Qualification.CR.Number;
     GPReg = Block->Registers.Reg + Block->GuestState.Qualification.CR.GPReg;
 
@@ -149,9 +155,11 @@ __vm_dr_access(
         __vmx_vmwrite_common(VMX_ENTRY_INTERRUPT_INFO, Block->GuestState.EntryInterruption.Information);
     }
     else {
+        __vmx_vmread_common(VM_EXIT_INFO_QUALIFICATION, &Block->GuestState.Qualification);
+
         if (4 == Block->GuestState.Qualification.DR.Number ||
             5 == Block->GuestState.Qualification.DR.Number) {
-            if (CR4_DE == (Block->Registers.Cr4 &CR4_DE)) {
+            if (CR4_DE == (Block->Registers.Cr4 & CR4_DE)) {
                 Block->GuestState.EntryInterruption.Vector = VECTOR_UD;
                 Block->GuestState.EntryInterruption.DeliverErrorCode = 0;
                 Block->GuestState.EntryInterruption.Type = EXCEPTION;
@@ -297,11 +305,7 @@ __vm_exit_dispatch(
     __vmx_vmread_common(GUEST_RSP, &CurrentBlock->GuestState.GuestRsp);
     __vmx_vmread_common(GUEST_RFLAGS, &CurrentBlock->GuestState.GuestRFlags);
     __vmx_vmread_common(VM_EXIT_INFO_REASON, &CurrentBlock->GuestState.Reason);
-    __vmx_vmread_common(VM_EXIT_INFO_INTERRUPT_INFO, &CurrentBlock->GuestState.ExitInterruption);
-    __vmx_vmread_common(VM_EXIT_INFO_IDT_VECTORING, &CurrentBlock->GuestState.IdtVectoring);
-    __vmx_vmread_common(VM_EXIT_INFO_QUALIFICATION, &CurrentBlock->GuestState.Qualification);
     __vmx_vmread_common(VM_EXIT_INFO_INSTRUCTION_LENGTH, &CurrentBlock->GuestState.InstructionLength);
-    __vmx_vmread_common(VM_EXIT_INFO_INSTRUCTION_INFO, &CurrentBlock->GuestState.Instruction);
 
     Handlers[CurrentBlock->GuestState.Reason.BasicReason](CurrentBlock);
 

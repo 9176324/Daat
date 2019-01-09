@@ -859,21 +859,6 @@ extern "C" {
             __in ULONG Selector
         );
 
-    typedef union _KIDT_HANDLER {
-        struct {
-#ifndef _WIN64
-            USHORT Offset;
-            USHORT ExtendedOffset;
-#else
-            USHORT OffsetLow;
-            USHORT OffsetMiddle;
-            ULONG OffsetHigh;
-#endif // !_WIN64
-        };
-
-        ULONG_PTR Address;
-    } KIDT_HANDLER, *PKIDT_HANDLER;
-
     VOID
         NTAPI
         __vmx_vmentry(

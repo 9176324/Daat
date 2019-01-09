@@ -37,13 +37,14 @@ VmxStartProcessors(
     PCCB DpcNotify = NULL;
     PCCB CurrentBlock = NULL;
 
+    CurrentBlock = DeferredContext;
+
 #ifndef PUBLIC
     DbgPrint(
-        "[Sefirot] [Daat] < %p > current processor number\n",
-        KeGetCurrentProcessorNumber());
+        "[Sefirot] [Daat] < %p : %p > current processor\n",
+        KeGetCurrentProcessorNumber(),
+        CurrentBlock);
 #endif // !PUBLIC
-
-    CurrentBlock = DeferredContext;
 
     __vmx_start(&CurrentBlock->Registers);
 

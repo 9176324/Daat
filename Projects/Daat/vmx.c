@@ -582,7 +582,9 @@ __vmx_entry(
         "[Sefirot] [Daat] secondary control  < %p >\n",
         CurrentBlock->VmxInfo.Secondary.QuadPart);
 
-    CurrentBlock->VmxInfo.Primary.LowPart |= MSR_BITMAP_ACTIVE | SECONDARY_CONTROLS;
+    CurrentBlock->VmxInfo.Primary.LowPart |= DR_EXITING;
+    CurrentBlock->VmxInfo.Primary.LowPart |= MSR_BITMAP_ACTIVE;
+    CurrentBlock->VmxInfo.Primary.LowPart |= SECONDARY_CONTROLS;
 
     CurrentBlock->VmxInfo.Primary.LowPart &= CurrentBlock->VmxInfo.PrimaryFixed.HighPart;
     CurrentBlock->VmxInfo.Primary.LowPart |= CurrentBlock->VmxInfo.PrimaryFixed.LowPart;
@@ -634,6 +636,8 @@ __vmx_entry(
         "[Sefirot] [Daat] entry control < %p >\n",
         CurrentBlock->VmxInfo.Entry.QuadPart);
 #endif // !_WIN64
+
+    // __debugbreak();
 
     Result = __vmx_vmlaunch();
 

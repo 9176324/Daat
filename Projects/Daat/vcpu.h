@@ -717,6 +717,58 @@ extern "C" {
     C_ASSERT(sizeof(REGISTERS_FRAME) == 0x280);
 #endif // !_WIN64
 
+    typedef struct _INTERRUPTION_FRAME {
+        ULONG_PTR ProgramCounter;
+        ULONG_PTR SegCs;
+        ULONG_PTR Eflags;
+    }INTERRUPTION_FRAME, *PINTERRUPTION_FRAME;
+
+#define DivideErrorFault        0  
+#define DebugTrapOrFault        1  
+#define NmiInterrupt            2  
+#define BreakpointTrap          3  
+#define OverflowTrap            4  
+#define BoundFault              5  
+#define InvalidOpcodeFault      6  
+#define NpxNotAvailableFault    7  
+#define DoubleFaultAbort        8  
+#define NpxSegmentOverrunAbort  9  
+#define InvalidTssFault         10 
+#define SegmentNotPresentFault  11 
+#define StackFault              12 
+#define GeneralProtectionFault  13 
+#define PageFault               14 
+#define FloatingErrorFault      16 
+#define AlignmentFault          17 
+#define McheckAbort             18 
+#define XmmException            19 
+#define ApcInterrupt            31 
+#define RaiseAssertion          44 
+#define DebugServiceTrap        45 
+#define DpcInterrupt            47 
+#define IpiInterrupt            225
+
+    typedef
+        VOID
+        (NTAPI * PIDT_HANDLER)(
+            VOID
+            );
+
+    typedef union _KIDT_HANDLER {
+        struct {
+#ifndef _WIN64
+            USHORT Offset;
+            USHORT ExtendedOffset;
+#else
+            USHORT OffsetLow;
+            USHORT OffsetMiddle;
+            ULONG OffsetHigh;
+#endif // !_WIN64
+        };
+
+        ULONG_PTR Address;
+    } KIDT_HANDLER, *PKIDT_HANDLER;
+
     typedef struct _CCB {
         DECLSPEC_ALIGN(PAGE_SIZE) struct {
             UCHAR KernelStack[KERNEL_LARGE_STACK_SIZE - sizeof(REGISTERS_FRAME)];
