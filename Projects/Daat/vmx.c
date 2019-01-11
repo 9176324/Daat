@@ -484,6 +484,8 @@ __vmx_entry(
     __vmx_vmwrite_common(GUEST_CR3, CurrentBlock->Registers.Cr3);
     __vmx_vmwrite_common(GUEST_CR4, CurrentBlock->VmxInfo.Cr4.QuadPart);
 
+    CurrentBlock->Registers.Dr7 = __ops_readdr(7);
+
     __vmx_vmwrite_common(GUEST_DR7, CurrentBlock->Registers.Dr7);
     __vmx_vmwrite_common(GUEST_RFLAGS, CurrentBlock->Registers.EFlags);
 

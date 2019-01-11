@@ -650,6 +650,7 @@ REGISTERS_FRAME_LENGTH EQU 00080h
         push ebx
         push esi
         push edi
+        push ebp
         
         mov ecx, [ebp + 8]
 
@@ -665,6 +666,7 @@ REGISTERS_FRAME_LENGTH EQU 00080h
         mov eax, -1
 
 resume :
+        pop ebp
         pop edi
         pop esi
         pop ebx
