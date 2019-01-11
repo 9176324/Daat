@@ -280,8 +280,8 @@ extern "C" {
                 ULONG Dr1;
                 ULONG Dr2;
                 ULONG Dr3;
-                ULONG NOTHING : 32;
-                ULONG NOTHING : 32;
+                ULONG Dr4;
+                ULONG Dr5;
                 ULONG Dr6;
                 ULONG Dr7;
             };
@@ -355,6 +355,8 @@ extern "C" {
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr1) == 0x2c);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr2) == 0x30);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr3) == 0x34);
+    C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr4) == 0x38);
+    C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr5) == 0x3c);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr6) == 0x40);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr7) == 0x44);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, SegEs) == 0x48);
@@ -569,8 +571,8 @@ extern "C" {
                 ULONG64 Dr1;
                 ULONG64 Dr2;
                 ULONG64 Dr3;
-                ULONG64 NOTHING : 64;
-                ULONG64 NOTHING : 64;
+                ULONG64 Dr4;
+                ULONG64 Dr5;
                 ULONG64 Dr6;
                 ULONG64 Dr7;
             };
@@ -695,6 +697,8 @@ extern "C" {
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr1) == 0x1d0);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr2) == 0x1d8);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr3) == 0x1e0);
+    C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr4) == 0x1e8);
+    C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr5) == 0x1f0);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr6) == 0x1f8);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr7) == 0x200);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, SegEs) == 0x208);
@@ -809,34 +813,67 @@ extern "C" {
             __in PREGISTERS_FRAME Registers
         );
 
-    VOID
+    ULONG
         NTAPI
-        CaptureSegment(
-            __out PREGISTERS_FRAME Registers
+        __ops_sldt(
+            __in PUSHORT Selector
+        );
+
+    ULONG
+        NTAPI
+        __ops_str(
+            __in PUSHORT Selector
+        );
+
+    ULONG
+        NTAPI
+        __ops_sgdt(
+            __in PUSHORT Limit
+        );
+
+    ULONG
+        NTAPI
+        __ops_sidt(
+            __in PUSHORT Limit
+        );
+
+    ULONG64
+        NTAPI
+        __ops_readmsr(
+            __in ULONG Register
         );
 
     VOID
         NTAPI
-        CaptureSegmentRegisters(
-            __out PREGISTERS_FRAME Registers
+        __ops_writemsr(
+            __in ULONG Register,
+            __in ULONG64 Value
+        );
+
+    SIZE_T
+        NTAPI
+        __ops_readcr(
+            __in ULONG Register
         );
 
     VOID
         NTAPI
-        CaptureControlRegisters(
-            __out PREGISTERS_FRAME Registers
+        __ops_writecr(
+            __in ULONG Register,
+            __in SIZE_T Value
+        );
+
+    SIZE_T
+        NTAPI
+        __ops_readdr(
+            __in ULONG Register
         );
 
     VOID
         NTAPI
-        CaptureDebugRegisters(
-            __out PREGISTERS_FRAME Registers
-        );
-
-    VOID
-        NTAPI
-        RestoreDebugRegisters(
-            __out PREGISTERS_FRAME Registers
+        __ops_writedr(
+            __in ULONG Register,
+            __in SIZE_T Value
         );
 
 #ifdef __cplusplus

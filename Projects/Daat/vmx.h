@@ -682,45 +682,6 @@ extern "C" {
         UCHAR Data[PAGE_SIZE - 8];
     } VMX_VMCS, *PVMX_VMCS;
 
-    VOID
-        NTAPI
-        __ops_writecr0(
-            __in SIZE_T Value
-        );
-
-    VOID
-        NTAPI
-        __ops_writecr3(
-            __in SIZE_T Value
-        );
-
-    VOID
-        NTAPI
-        __ops_writecr4(
-            __in SIZE_T Value
-        );
-
-#ifdef _WIN64
-    VOID
-        NTAPI
-        __ops_writecr8(
-            __in SIZE_T Value
-        );
-#endif // _WIN64
-
-    ULONG64
-        NTAPI
-        __ops_readmsr(
-            __in ULONG Register
-        );
-
-    VOID
-        NTAPI
-        __ops_writemsr(
-            __in ULONG Register,
-            __in ULONG64 Value
-        );
-
     typedef struct _INVEPT_DESCRIPTOR {
         ULONG64 EptPointer;
         ULONG64 Reserved;

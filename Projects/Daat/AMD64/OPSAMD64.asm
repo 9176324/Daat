@@ -126,6 +126,62 @@ REGISTERS_FRAME_LENGTH EQU 00280h
 
 ; ULONG
 ;     NTAPI
+;     __ops_sldt(
+;         __in PUSHORT Selector 
+;     );
+
+        LEAF_ENTRY __ops_sldt, _TEXT$00
+        
+        sldt word ptr [rcx]
+        
+        ret
+        
+        LEAF_END __ops_sldt, _TEXT$00
+        
+; ULONG
+;     NTAPI
+;     __ops_str(
+;         __in PUSHORT Selector 
+;     );
+
+        LEAF_ENTRY __ops_str, _TEXT$00
+        
+        str word ptr [rcx]
+        
+        ret
+        
+        LEAF_END __ops_str, _TEXT$00
+        
+; ULONG
+;     NTAPI
+;     __ops_sgdt(
+;         __in PUSHORT Limit
+;     );
+
+        LEAF_ENTRY __ops_sgdt, _TEXT$00
+        
+        sgdt fword ptr [rcx] ; &Descriptor->Limit
+        
+        ret
+        
+        LEAF_END __ops_sgdt, _TEXT$00
+        
+; ULONG
+;     NTAPI
+;     __ops_sidt(
+;         __in PUSHORT Limit
+;     );
+
+        LEAF_ENTRY __ops_sidt, _TEXT$00
+        
+        sidt fword ptr [rcx] ; &Descriptor->Limit
+        
+        ret
+        
+        LEAF_END __ops_sidt, _TEXT$00
+        
+; ULONG
+;     NTAPI
 ;     __ops_segment_limit(
 ;         __in ULONG Selector
 ;     );
@@ -200,61 +256,175 @@ REGISTERS_FRAME_LENGTH EQU 00280h
 
         LEAF_END __ops_writemsr, _TEXT$00
         
-; VOID
+; SIZE_T
 ;     NTAPI
-;     __ops_writecr0(
-;         __in ULONG64 Value
+;     __ops_readcr(
+;         __in ULONG Register
 ;     );
 
-        LEAF_ENTRY __ops_writecr0, _TEXT$00
+        LEAF_ENTRY __ops_readcr, _TEXT$00
         
-        mov cr0, rcx
+        test ecx, ecx
+        jnz @f
 
+        mov rax, cr0
+
+@@ :
+        cmp ecx, 3
+        jnz @f
+        
+        mov rax, cr3
+        
+@@ :
+        cmp ecx, 4
+        jnz @f
+        
+        mov rax, cr4
+
+@@ :
+        cmp ecx, 8
+        jnz @f
+        
+        mov rax, cr8
+
+@@ :
         ret
 
-        LEAF_END __ops_writecr0, _TEXT$00
-        
-; VOID
-;     NTAPI
-;     __ops_writecr3(
-;         __in ULONG64 Value
-;     );
-
-        LEAF_ENTRY __ops_writecr3, _TEXT$00
-        
-        mov cr3, rcx
-
-        ret
-
-        LEAF_END __ops_writecr3, _TEXT$00
-        
-; VOID
-;     NTAPI
-;     __ops_writecr4(
-;         __in ULONG64 Value
-;     );
-
-        LEAF_ENTRY __ops_writecr4, _TEXT$00
-        
-        mov cr4, rcx
-
-        ret
-
-        LEAF_END __ops_writecr4, _TEXT$00
+        LEAF_END __ops_readcr, _TEXT$00
         
 ; VOID
 ;     NTAPI
-;     __ops_writecr8(
-;         __in ULONG64 Value
+;     __ops_writecr(
+;         __in ULONG Register,
+;         __in SIZE_T Value
 ;     );
 
-        LEAF_ENTRY __ops_writecr8, _TEXT$00
+        LEAF_ENTRY __ops_writecr, _TEXT$00
         
-        mov cr4, rcx
+        test ecx, ecx
+        jnz @f
 
+        mov cr0, rdx
+
+@@ :
+        cmp ecx, 3
+        jnz @f
+
+        mov cr3, rdx
+        
+@@ :
+        cmp ecx, 4
+        jnz @f
+
+        mov cr4, rdx
+
+@@ :
+        cmp ecx, 8
+        jnz @f
+
+        mov cr8, rdx
+
+@@ :
         ret
 
-        LEAF_END __ops_writecr8, _TEXT$00
+        LEAF_END __ops_writecr, _TEXT$00
+        
+; SIZE_T
+;     NTAPI
+;     __ops_readdr(
+;         __in ULONG Register
+;     );
+
+        LEAF_ENTRY __ops_readdr, _TEXT$00
+        
+        test ecx, ecx
+        jnz @f
+
+        mov rax, dr0
+
+@@ :
+        cmp ecx, 1
+        jnz @f
+        
+        mov rax, dr1
+        
+@@ :
+        cmp ecx, 2
+        jnz @f
+        
+        mov rax, dr2
+        
+@@ :
+        cmp ecx, 3
+        jnz @f
+        
+        mov rax, dr3
+        
+@@ :
+        cmp ecx, 6
+        jnz @f
+        
+        mov rax, dr6
+        
+@@ :
+        cmp ecx, 7
+        jnz @f
+        
+        mov rax, dr7
+        
+@@ :
+        ret
+
+        LEAF_END __ops_readdr, _TEXT$00
+        
+; VOID
+;     NTAPI
+;     __ops_writedr(
+;         __in ULONG Register,
+;         __in SIZE_T Value
+;     );
+
+        LEAF_ENTRY __ops_writedr, _TEXT$00
+        
+        test ecx, ecx
+        jnz @f
+
+        mov dr0, rax
+
+@@ :
+        cmp ecx, 1
+        jnz @f
+
+        mov dr1, rax
+        
+@@ :
+        cmp ecx, 2
+        jnz @f
+
+        mov dr2, rax
+        
+@@ :
+        cmp ecx, 3
+        jnz @f
+
+        mov dr3, rax
+        
+@@ :
+        cmp ecx, 6
+        jnz @f
+
+        mov dr6, rax
+        
+@@ :
+        cmp ecx, 7
+        jnz @f
+
+        mov dr7, rax
+        
+@@ :
+        ret
+
+        LEAF_END __ops_writedr, _TEXT$00
         
 ; VMX_RESULT
 ;     NTAPI
@@ -506,7 +676,7 @@ REGISTERS_FRAME_LENGTH EQU 00280h
         mov RfRip [rcx], rax
         
         call __vm_exit_dispatch
-
+        
         LEAF_END __vmx_vmentry, _TEXT$00
     
 ; NTSTATUS
@@ -707,6 +877,13 @@ resume :
 
         LEAF_ENTRY CaptureRegisters, _TEXT$00
         
+        mov RfSegEs [rcx], es
+        mov RfSegCs [rcx], cs
+        mov RfSegSs [rcx], ss
+        mov RfSegDs [rcx], ds
+        mov RfSegFs [rcx], fs
+        mov RfSegGs [rcx], gs
+        
         mov RfRax [rcx], rax
         mov RfRcx [rcx], rcx
         mov RfRdx [rcx], rdx
@@ -810,103 +987,5 @@ resume :
         ret
         
         LEAF_END RestoreRegisters, _TEXT$00
-        
-; VOID
-;     NTAPI
-;     CaptureSegmentRegisters(
-;         __out PREGISTERS_FRAME Registers
-;     );
-
-        LEAF_ENTRY CaptureSegmentRegisters, _TEXT$00
-        
-        mov RfSegEs [rcx], es
-        mov RfSegCs [rcx], cs
-        mov RfSegSs [rcx], ss
-        mov RfSegDs [rcx], ds
-        mov RfSegFs [rcx], fs
-        mov RfSegGs [rcx], gs
-        
-        sldt word ptr RfLdtr [rcx]
-        str word ptr RfTr [rcx]
-        
-        sgdt fword ptr RfGdtr [rcx]
-        sidt fword ptr RfIdtr [rcx]
-        
-        ret
-        
-        LEAF_END CaptureSegmentRegisters, _TEXT$00
-        
-; VOID
-;     NTAPI
-;     CaptureControlRegisters(
-;         __out PREGISTERS_FRAME Registers
-;     );
-
-        LEAF_ENTRY CaptureControlRegisters, _TEXT$00
-        
-        mov rax, cr0
-        mov RfCr0 [rcx], rax
-        mov rax, cr2
-        mov RfCr2 [rcx], rax
-        mov rax, cr3
-        mov RfCr3 [rcx], rax
-        mov rax, cr4
-        mov RfCr4 [rcx], rax
-        mov rax, cr8
-        mov RfCr8 [rcx], rax
-
-        ret
-        
-        LEAF_END CaptureControlRegisters, _TEXT$00
-        
-; VOID
-;     NTAPI
-;     CaptureDebugRegisters(
-;         __out PREGISTERS_FRAME Registers
-;     );
-
-        LEAF_ENTRY CaptureDebugRegisters, _TEXT$00
-        
-        mov rax, dr0
-        mov RfDr0 [rcx], rax
-        mov rax, dr1
-        mov RfDr1 [rcx], rax
-        mov rax, dr2
-        mov RfDr2 [rcx], rax
-        mov rax, dr3
-        mov RfDr3 [rcx], rax
-        mov rax, dr6
-        mov RfDr6 [rcx], rax
-        mov rax, dr7
-        mov RfDr7 [rcx], rax
-        
-        ret
-        
-        LEAF_END CaptureDebugRegisters, _TEXT$00
-        
-; VOID
-;     NTAPI
-;     RestoreDebugRegisters(
-;         __out PREGISTERS_FRAME Registers
-;     );
-
-        LEAF_ENTRY RestoreDebugRegisters, _TEXT$00
-        
-        mov rax, RfDr0 [rcx]
-        mov dr0, rax
-        mov rax, RfDr1 [rcx]
-        mov dr1, rax
-        mov rax, RfDr2 [rcx]
-        mov dr2, rax
-        mov rax, RfDr3 [rcx]
-        mov dr3, rax
-        mov rax, RfDr6 [rcx]
-        mov dr6, rax
-        mov rax, RfDr7 [rcx]
-        mov dr7, rax
-        
-        ret
-        
-        LEAF_END RestoreDebugRegisters, _TEXT$00
         
         end

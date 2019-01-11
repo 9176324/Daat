@@ -33,7 +33,7 @@ BIND = $(SLND)Build\Bins\$(ARCTARG)
 PROJTARG = $(BIND)\$(PROJ)
 PROJD = $(SLND)Projects\$(PROJ)
 
-BUILD: $(PROJTARG).bin
+BUILD: $(PROJTARG).sys
 
 OBJD = $(SLND)Build\Objs\$(PROJ)\$(ARCTARG)
 
@@ -135,9 +135,9 @@ BUILDLIBS = hal.lib ntoskrnl.lib bufferoverflowk.lib \
 LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup
 LINK = link.exe /nologo
 
-LINKPROJNAMES = /out:$(PROJTARG).bin /map:$(PROJTARG).map /pdb:$(PROJTARG).pdb
+LINKPROJNAMES = /out:$(PROJTARG).sys /map:$(PROJTARG).map /pdb:$(PROJTARG).pdb
 
-$(PROJTARG).bin: $(PROJOBJS)
+$(PROJTARG).sys: $(PROJOBJS)
     @$(LINK) $(LINKFLAGS) $(PROJLOPTS) $(LINKPROJNAMES) $** $(HOTPATCH) $(LINKLIBPATH) $(BUILDLIBS)
 
 # assembly files
@@ -165,7 +165,7 @@ CLEAN:
     @if exist $(PROJTARG).sys del /F /Q $(PROJTARG).sys
     @if exist $(PROJTARG).dll del /F /Q $(PROJTARG).dll
     @if exist $(PROJTARG).lib del /F /Q $(PROJTARG).lib
-    @if exist $(PROJTARG).bin del /F /Q $(PROJTARG).bin
+    @if exist $(PROJTARG).sys del /F /Q $(PROJTARG).sys
     @if exist $(PROJTARG).exp del /F /Q $(PROJTARG).exp
     @if exist $(PROJTARG).map del /F /Q $(PROJTARG).map
     @if exist $(PROJTARG).pdb del /F /Q $(PROJTARG).pdb
