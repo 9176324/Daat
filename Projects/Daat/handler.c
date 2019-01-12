@@ -33,7 +33,7 @@ __inject_exception(
 )
 {
     __vmx_vmread_common(
-        VM_EXIT_INFO_IDT_VECTORING, 
+        VM_EXIT_INFO_IDT_VECTORING,
         &Block->GuestState.IdtVectoring);
 
     if (0 != Block->GuestState.IdtVectoring.Valid) {
@@ -56,11 +56,68 @@ __inject_exception(
             ErrorCode);
     }
 
-    Block->GuestState.EntryInterruption.Information &= 0x00000000FFFFFFFF;
+    Block->GuestState.EntryInterruption.Information &= 0x00000000FFFFFFFFULL;
 
     __vmx_vmwrite_common(
         VMX_ENTRY_INTERRUPT_INFO,
         Block->GuestState.EntryInterruption.Information);
+
+    __vmx_vmwrite(
+        VMX_ENTRY_INSTRUCTION_LENGTH,
+        Block->GuestState.InstructionLength);
+}
+
+VOID
+NTAPI
+__vm_exception_nmi(
+    __inout PCCB Block
+)
+{
+    ULONG64 ErrorCode = NO_ERROR_CODE;
+
+    __vmx_vmread_common(
+        VM_EXIT_INFO_INTERRUPT_INFO,
+        &Block->GuestState.ExitInterruption.Information);
+
+    if (0 != Block->GuestState.ExitInterruption.ErrorCode) {
+        __vmx_vmread_common(
+            VM_EXIT_INFO_EXCEPTION_ERROR_CODE,
+            &ErrorCode);
+    }
+
+    switch (Block->GuestState.ExitInterruption.Vector) {
+    case VECTOR_NMI: {
+        break;
+    }
+
+    case VECTOR_DB: {
+
+        break;
+    }
+
+    case VECTOR_BP: {
+        break;
+    }
+
+    default: {
+        break;
+    }
+    }
+
+    __inject_exception(
+        Block,
+        Block->GuestState.ExitInterruption.Vector,
+        ErrorCode,
+        Block->GuestState.ExitInterruption.Type);
+}
+
+VOID
+NTAPI
+__vm_interrupt(
+    __inout PCCB Block
+)
+{
+
 }
 
 VOID
@@ -151,14 +208,14 @@ __vm_cr_access(
 )
 {
     ULONG_PTR *Cr = NULL;
-    ULONG_PTR *GPReg = NULL;
+    ULONG_PTR *GpReg = NULL;
 
     __vmx_vmread_common(
         VM_EXIT_INFO_QUALIFICATION,
         &Block->GuestState.Qualification);
 
     Cr = Block->Registers.Cr + Block->GuestState.Qualification.CR.Number;
-    GPReg = Block->Registers.Reg + Block->GuestState.Qualification.CR.GPReg;
+    GpReg = Block->Registers.Reg + Block->GuestState.Qualification.CR.GpReg;
 
     if (0 != Block->GuestState.Qualification.CR.Type) {
         // MOV from CR
@@ -167,16 +224,20 @@ __vm_cr_access(
         __vmx_vmread_common(GUEST_CR3, &Block->Registers.Cr3);
         __vmx_vmread_common(GUEST_CR4, &Block->Registers.Cr4);
 
-        *GPReg = *Cr;
+        Block->Registers.Cr2 = __ops_readcr(2);
+
+        *GpReg = *Cr;
     }
     else {
         // MOV to CR
 
-        *Cr = *GPReg;
+        *Cr = *GpReg;
 
         __vmx_vmwrite_common(GUEST_CR0, Block->Registers.Cr0);
         __vmx_vmwrite_common(GUEST_CR3, Block->Registers.Cr3);
         __vmx_vmwrite_common(GUEST_CR4, Block->Registers.Cr4);
+
+        __ops_writecr(2, Block->Registers.Cr2);
     }
 }
 
@@ -186,17 +247,21 @@ __vm_dr_access(
     __inout PCCB Block
 )
 {
-    ULONG_PTR * GPReg = NULL;
+    ULONG_PTR * DrReg = NULL;
+    ULONG_PTR * GpReg = NULL;
 
     __vmx_vmread_common(GUEST_DR7, &Block->Registers.Dr7);
 
-    if (Block->Registers.Dr7 & DR7_GD) {
-        Block->Registers.Dr6 = __ops_readdr(6);
+    if (DR7_GD == (Block->Registers.Dr7 & DR7_GD)) {
+        Block->Registers.Dr6 = __ops_readdr(6) | DR6_BD;
+
+        __ops_writedr(6, Block->Registers.Dr6);
 
         Block->Registers.Dr7 &= ~DR7_GD;
-        Block->Registers.Dr6 |= DR6_BD;
 
         __vmx_vmwrite_common(GUEST_DR7, Block->Registers.Dr7);
+
+        Block->GuestState.InstructionLength = 0;
 
         __inject_exception(Block, VECTOR_DB, NO_ERROR_CODE, EXCEPTION);
 
@@ -209,6 +274,8 @@ __vm_dr_access(
 
         if (4 == Block->GuestState.Qualification.DR.Number) {
             if (CR4_DE == (Block->Registers.Cr4 & CR4_DE)) {
+                Block->GuestState.InstructionLength = 0;
+
                 __inject_exception(Block, VECTOR_UD, NO_ERROR_CODE, EXCEPTION);
 
                 return;
@@ -221,6 +288,8 @@ __vm_dr_access(
         }
         if (5 == Block->GuestState.Qualification.DR.Number) {
             if (CR4_DE == (Block->Registers.Cr4 & CR4_DE)) {
+                Block->GuestState.InstructionLength = 0;
+
                 __inject_exception(Block, VECTOR_UD, NO_ERROR_CODE, EXCEPTION);
 
                 return;
@@ -232,25 +301,27 @@ __vm_dr_access(
             }
         }
 
-        GPReg = Block->Registers.Reg + Block->GuestState.Qualification.CR.GPReg;
+        DrReg = Block->Registers.Dr + Block->GuestState.Qualification.DR.Number;
+        GpReg = Block->Registers.Reg + Block->GuestState.Qualification.DR.GpReg;
 
         if (0 != Block->GuestState.Qualification.DR.Direction) {
             // MOV DR -> GPR
 
             if (7 != Block->GuestState.Qualification.DR.Number) {
-                *GPReg = __ops_readdr(Block->GuestState.Qualification.DR.Number);
+                *DrReg = __ops_readdr(Block->GuestState.Qualification.DR.Number);
             }
-            else {
-                *GPReg = Block->Registers.Dr7;
-            }
+
+            *GpReg = *DrReg;
         }
         else {
             // MOV DR <- GPR
 
+            *DrReg = *GpReg;
+
             if (7 != Block->GuestState.Qualification.DR.Number) {
                 __ops_writedr(
                     Block->GuestState.Qualification.DR.Number,
-                    *GPReg);
+                    *DrReg);
             }
             else {
                 __vmx_vmwrite_common(GUEST_DR7, Block->Registers.Dr7);
@@ -403,8 +474,8 @@ __vm_xsetbv(
 }
 
 PVM_HANDLER Handlers[] = {
-    __vm_null, // [VMX_EXIT_INT_EXCEPTION_NMI] An SW interrupt, exception or NMI has occurred
-    __vm_null, // [VMX_EXIT_EXT_INTERRUPT] An external interrupt has occurred
+    __vm_exception_nmi, // [VMX_EXIT_INT_EXCEPTION_NMI] An SW interrupt, exception or NMI has occurred
+    __vm_interrupt, // [VMX_EXIT_EXT_INTERRUPT] An external interrupt has occurred
     __vm_null, // [VMX_EXIT_TRIPLE_FAULT] Triple fault occurred
     __vm_null, // [VMX_EXIT_INIT_EVENT] INIT signal arrived
     __vm_null, // [VMX_EXIT_SIPI_EVENT] SIPI signal arrived
@@ -476,7 +547,6 @@ __vm_exit_dispatch(
     CurrentBlock = CONTAINING_RECORD(Registers, CCB, Registers);
 
     __vmx_vmread_common(GUEST_RIP, &CurrentBlock->GuestState.GuestRip);
-    __vmx_vmread_common(GUEST_RSP, &CurrentBlock->GuestState.GuestRsp);
     __vmx_vmread_common(VM_EXIT_INFO_REASON, &CurrentBlock->GuestState.Reason);
     __vmx_vmread_common(VM_EXIT_INFO_INSTRUCTION_LENGTH, &CurrentBlock->GuestState.InstructionLength);
 
@@ -484,7 +554,6 @@ __vm_exit_dispatch(
 
     CurrentBlock->GuestState.GuestRip += CurrentBlock->GuestState.InstructionLength;
 
-    __vmx_vmwrite_common(GUEST_RSP, CurrentBlock->GuestState.GuestRsp);
     __vmx_vmwrite_common(GUEST_RIP, CurrentBlock->GuestState.GuestRip);
 
     RestoreRegisters(Registers);

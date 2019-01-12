@@ -269,11 +269,23 @@ REGISTERS_FRAME_LENGTH EQU 00280h
 
         mov rax, cr0
 
+        jmp __ops_readcr_ret
+        
+@@ :
+        cmp ecx, 2
+        jnz @f
+        
+        mov rax, cr2
+
+        jmp __ops_readcr_ret
+        
 @@ :
         cmp ecx, 3
         jnz @f
         
         mov rax, cr3
+
+        jmp __ops_readcr_ret
         
 @@ :
         cmp ecx, 4
@@ -281,13 +293,15 @@ REGISTERS_FRAME_LENGTH EQU 00280h
         
         mov rax, cr4
 
+        jmp __ops_readcr_ret
+
 @@ :
         cmp ecx, 8
-        jnz @f
+        jnz __ops_readcr_ret
         
         mov rax, cr8
 
-@@ :
+__ops_readcr_ret :
         ret
 
         LEAF_END __ops_readcr, _TEXT$00
@@ -306,11 +320,23 @@ REGISTERS_FRAME_LENGTH EQU 00280h
 
         mov cr0, rdx
 
+        jmp __ops_writecr_ret
+        
+@@ :
+        cmp ecx, 2
+        jnz @f
+
+        mov cr2, rdx
+
+        jmp __ops_writecr_ret
+        
 @@ :
         cmp ecx, 3
         jnz @f
 
         mov cr3, rdx
+
+        jmp __ops_writecr_ret
         
 @@ :
         cmp ecx, 4
@@ -318,13 +344,15 @@ REGISTERS_FRAME_LENGTH EQU 00280h
 
         mov cr4, rdx
 
+        jmp __ops_writecr_ret
+
 @@ :
         cmp ecx, 8
-        jnz @f
+        jnz __ops_writecr_ret
 
         mov cr8, rdx
 
-@@ :
+__ops_writecr_ret :
         ret
 
         LEAF_END __ops_writecr, _TEXT$00
@@ -342,37 +370,47 @@ REGISTERS_FRAME_LENGTH EQU 00280h
 
         mov rax, dr0
 
+        jmp __ops_readdr_ret
+
 @@ :
         cmp ecx, 1
         jnz @f
         
         mov rax, dr1
+
+        jmp __ops_readdr_ret
         
 @@ :
         cmp ecx, 2
         jnz @f
         
         mov rax, dr2
+
+        jmp __ops_readdr_ret
         
 @@ :
         cmp ecx, 3
         jnz @f
         
         mov rax, dr3
+
+        jmp __ops_readdr_ret
         
 @@ :
         cmp ecx, 6
         jnz @f
         
         mov rax, dr6
+
+        jmp __ops_readdr_ret
         
 @@ :
         cmp ecx, 7
-        jnz @f
+        jnz __ops_readdr_ret
         
         mov rax, dr7
         
-@@ :
+__ops_readdr_ret :
         ret
 
         LEAF_END __ops_readdr, _TEXT$00
@@ -389,39 +427,49 @@ REGISTERS_FRAME_LENGTH EQU 00280h
         test ecx, ecx
         jnz @f
 
-        mov dr0, rax
+        mov dr0, rdx
+
+        jmp __ops_writedr_ret
 
 @@ :
         cmp ecx, 1
         jnz @f
 
-        mov dr1, rax
+        mov dr1, rdx
+
+        jmp __ops_writedr_ret
         
 @@ :
         cmp ecx, 2
         jnz @f
 
-        mov dr2, rax
+        mov dr2, rdx
+
+        jmp __ops_writedr_ret
         
 @@ :
         cmp ecx, 3
         jnz @f
 
-        mov dr3, rax
+        mov dr3, rdx
+
+        jmp __ops_writedr_ret
         
 @@ :
         cmp ecx, 6
         jnz @f
 
-        mov dr6, rax
+        mov dr6, rdx
+
+        jmp __ops_writedr_ret
         
 @@ :
         cmp ecx, 7
-        jnz @f
+        jnz __ops_writedr_ret
 
-        mov dr7, rax
+        mov dr7, rdx
         
-@@ :
+__ops_writedr_ret :
         ret
 
         LEAF_END __ops_writedr, _TEXT$00

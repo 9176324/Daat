@@ -153,6 +153,8 @@ extern "C" {
     }INSTRUCTION, *PINSTRUCTION;
 
     typedef union _QUALIFICATION {
+        ULONG64 Address;
+
         struct {
             ULONG64 Size : 3;
             ULONG64 Direction : 1;
@@ -167,7 +169,7 @@ extern "C" {
             ULONG64 Number : 4;
             ULONG64 Type : 2;
             ULONG64 LMSW : 2;
-            ULONG64 GPReg : 4;
+            ULONG64 GpReg : 4;
             ULONG64 NOTHING : 4;
             ULONG64 LMSWSource : 16;
         } CR;
@@ -177,7 +179,7 @@ extern "C" {
             ULONG64 NOTHING : 1;
             ULONG64 Direction : 1;
             ULONG64 NOTHING : 3;
-            ULONG64 GPReg : 4;
+            ULONG64 GpReg : 4;
             ULONG64 NOTHING : 20;
         } DR;
 

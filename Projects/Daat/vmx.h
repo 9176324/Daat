@@ -371,17 +371,17 @@ extern "C" {
 #undef CR0_PG
 
     enum {
-        CR0_PE = (1ULL << 0),
-        CR0_MP = (1ULL << 1),
-        CR0_EM = (1ULL << 2),
-        CR0_TS = (1ULL << 3),
-        CR0_ET = (1ULL << 4),
-        CR0_NE = (1ULL << 5),
-        CR0_WP = (1ULL << 16),
-        CR0_AM = (1ULL << 18),
-        CR0_NW = (1ULL << 29),
-        CR0_CD = (1ULL << 30),
-        CR0_PG = (1ULL << 31)
+        CR0_PE = (1 << 0),
+        CR0_MP = (1 << 1),
+        CR0_EM = (1 << 2),
+        CR0_TS = (1 << 3),
+        CR0_ET = (1 << 4),
+        CR0_NE = (1 << 5),
+        CR0_WP = (1 << 16),
+        CR0_AM = (1 << 18),
+        CR0_NW = (1 << 29),
+        CR0_CD = (1 << 30),
+        CR0_PG = (1U << 31)
     };
 
 #undef CR4_VME
@@ -394,47 +394,49 @@ extern "C" {
 #undef CR4_PGE
 
     enum {
-        CR4_VME = (1ULL << 0),
-        CR4_PVI = (1ULL << 1),
-        CR4_TSD = (1ULL << 2),
-        CR4_DE = (1ULL << 3),
-        CR4_PSE = (1ULL << 4),
-        CR4_PAE = (1ULL << 5),
-        CR4_MCE = (1ULL << 6),
-        CR4_PGE = (1ULL << 7),
-        CR4_PCE = (1ULL << 8),
-        CR4_OSFXSR = (1ULL << 9),
-        CR4_OSXMMEXCPT = (1ULL << 10),
-        CR4_VMXE = (1ULL << 13),
-        CR4_SMXE = (1ULL << 14)
+        CR4_VME = (1 << 0),
+        CR4_PVI = (1 << 1),
+        CR4_TSD = (1 << 2),
+        CR4_DE = (1 << 3),
+        CR4_PSE = (1 << 4),
+        CR4_PAE = (1 << 5),
+        CR4_MCE = (1 << 6),
+        CR4_PGE = (1 << 7),
+        CR4_PCE = (1 << 8),
+        CR4_OSFXSR = (1 << 9),
+        CR4_OSXMMEXCPT = (1 << 10),
+        CR4_VMXE = (1 << 13),
+        CR4_SMXE = (1 << 14)
     };
 
     enum {
-        DR6_BD = (1ULL << 13),
-        DR7_L0 = (1ULL << 0),
-        DR7_G0 = (1ULL << 1),
-        DR7_L1 = (1ULL << 2),
-        DR7_G1 = (1ULL << 3),
-        DR7_L2 = (1ULL << 4),
-        DR7_G2 = (1ULL << 5),
-        DR7_L3 = (1ULL << 6),
-        DR7_G3 = (1ULL << 7),
-        DR7_GD = (1ULL << 13),
+        DR6_BD = (1 << 13),
+        DR7_L0 = (1 << 0),
+        DR7_G0 = (1 << 1),
+        DR7_L1 = (1 << 2),
+        DR7_G1 = (1 << 3),
+        DR7_L2 = (1 << 4),
+        DR7_G2 = (1 << 5),
+        DR7_L3 = (1 << 6),
+        DR7_G3 = (1 << 7),
+        DR7_GD = (1 << 13),
     };
+
 #define DR6_SETBITS 0xFFFF0FF0
-#define DR7_SETBITS (1ULL << 10)
+#define DR7_SETBITS (1 << 10)
+
 #define HBREAK_ENABLED_MASK (DR7_L0 | DR7_G0 | \
-                            DR7_L1 | DR7_G1 | \
-                            DR7_L2 | DR7_G2 | \
-                            DR7_L3 | DR7_G3)
+                                DR7_L1 | DR7_G1 | \
+                                DR7_L2 | DR7_G2 | \
+                                DR7_L3 | DR7_G3)
 
     /*
     * According to SDM Vol 3B 17.2.6, DR6/7 high 32 bits should only be set to
     * 0 in 64 bits mode. Reserved bits should be 1.
     */
 
-#define FIX_DR6(val) ((val & 0xffffffff) | DR6_SETBITS)
-#define FIX_DR7(val) ((val & 0xffffffff) | DR7_SETBITS)
+#define FIX_DR6(val) ((val & 0xFFFFFFFFUL) | DR6_SETBITS)
+#define FIX_DR7(val) ((val & 0xFFFFFFFFUL) | DR7_SETBITS)
 
 #undef MSR_BPU_COUNTER0
 

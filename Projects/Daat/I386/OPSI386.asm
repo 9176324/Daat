@@ -231,25 +231,37 @@ REGISTERS_FRAME_LENGTH EQU 00080h
     cPublicProc ___ops_readcr, 1
     
         mov ecx, [esp + 4]
-
+        
         test ecx, ecx
         jnz @f
 
         mov eax, cr0
 
+        jmp __ops_readcr_ret
+        
+@@ :
+        cmp ecx, 2
+        jnz @f
+        
+        mov eax, cr2
+
+        jmp __ops_readcr_ret
+        
 @@ :
         cmp ecx, 3
         jnz @f
         
         mov eax, cr3
+
+        jmp __ops_readcr_ret
         
 @@ :
         cmp ecx, 4
-        jnz @f
+        jnz __ops_readcr_ret
         
         mov eax, cr4
 
-@@ :
+__ops_readcr_ret :
         stdRET ___ops_readcr
 
     stdENDP ___ops_readcr
@@ -264,26 +276,38 @@ REGISTERS_FRAME_LENGTH EQU 00080h
     cPublicProc ___ops_writecr, 2
     
         mov ecx, [esp + 4]
-        mov eax, [esp + 8]
-
+        mov edx, [esp + 8]
+        
         test ecx, ecx
         jnz @f
 
-        mov cr0, eax
+        mov cr0, edx
 
+        jmp __ops_writecr_ret
+        
+@@ :
+        cmp ecx, 2
+        jnz @f
+
+        mov cr2, edx
+
+        jmp __ops_writecr_ret
+        
 @@ :
         cmp ecx, 3
         jnz @f
 
-        mov cr3, eax
+        mov cr3, edx
+
+        jmp __ops_writecr_ret
         
 @@ :
         cmp ecx, 4
-        jnz @f
+        jnz __ops_writecr_ret
 
-        mov cr4, eax
+        mov cr4, edx
 
-@@ :
+__ops_writecr_ret :
         stdRET ___ops_writecr
 
     stdENDP ___ops_writecr
@@ -297,43 +321,53 @@ REGISTERS_FRAME_LENGTH EQU 00080h
     cPublicProc ___ops_readdr, 1
     
         mov ecx, [esp + 4]
-
+        
         test ecx, ecx
         jnz @f
 
         mov eax, dr0
+
+        jmp __ops_readdr_ret
 
 @@ :
         cmp ecx, 1
         jnz @f
         
         mov eax, dr1
+
+        jmp __ops_readdr_ret
         
 @@ :
         cmp ecx, 2
         jnz @f
         
         mov eax, dr2
+
+        jmp __ops_readdr_ret
         
 @@ :
         cmp ecx, 3
         jnz @f
         
         mov eax, dr3
+
+        jmp __ops_readdr_ret
         
 @@ :
         cmp ecx, 6
         jnz @f
         
         mov eax, dr6
+
+        jmp __ops_readdr_ret
         
 @@ :
         cmp ecx, 7
-        jnz @f
+        jnz __ops_readdr_ret
         
         mov eax, dr7
         
-@@ :
+__ops_readdr_ret :
         stdRET ___ops_readdr
 
     stdENDP ___ops_readdr
@@ -348,44 +382,54 @@ REGISTERS_FRAME_LENGTH EQU 00080h
     cPublicProc ___ops_writedr, 2
     
         mov ecx, [esp + 4]
-        mov eax, [esp + 8]
-
+        mov edx, [esp + 8]
+        
         test ecx, ecx
         jnz @f
 
-        mov dr0, eax
+        mov dr0, edx
+
+        jmp __ops_writedr_ret
 
 @@ :
         cmp ecx, 1
         jnz @f
 
-        mov dr1, eax
+        mov dr1, edx
+
+        jmp __ops_writedr_ret
         
 @@ :
         cmp ecx, 2
         jnz @f
 
-        mov dr2, eax
+        mov dr2, edx
+
+        jmp __ops_writedr_ret
         
 @@ :
         cmp ecx, 3
         jnz @f
 
-        mov dr3, eax
+        mov dr3, edx
+
+        jmp __ops_writedr_ret
         
 @@ :
         cmp ecx, 6
         jnz @f
 
-        mov dr6, eax
+        mov dr6, edx
+
+        jmp __ops_writedr_ret
         
 @@ :
         cmp ecx, 7
-        jnz @f
+        jnz __ops_writedr_ret
 
-        mov dr7, eax
+        mov dr7, edx
         
-@@ :
+__ops_writedr_ret :
         stdRET ___ops_writedr
 
     stdENDP ___ops_writedr
@@ -613,7 +657,7 @@ REGISTERS_FRAME_LENGTH EQU 00080h
     cPublicProc ___vmx_vmentry
     
         mov [esp].RfEax, eax
-        mov [esp].RfEax, ecx
+        mov [esp].RfEcx, ecx
         mov [esp].RfEdx, edx
         mov [esp].RfEbx, ebx
         mov [esp].RfEsp, esp

@@ -518,7 +518,39 @@ __vmx_entry(
     __vmx_vmwrite_common(VMX_CR4_MASK, CurrentBlock->VmxInfo.Cr4Mask.QuadPart);
     __vmx_vmwrite_common(VMX_CR4_READ_SHADOW, CurrentBlock->VmxInfo.Cr4ReadShadow.QuadPart);
 
+    // read 0x00000000 - 0x00001FFF 0 ~ 1023
+    // read 0xC0000000 - 0xC0001FFF 1024 ~ 2047
+#define SetReadBitmap(map, bit) \
+            *((PCHAR)(map) + \
+                (((bit) & 0xC0000000) ? 0x400 : 0) + \
+                    (((bit) & 0x1FFF) >> 3)) |= 1 << ((bit) & 7);
+
+    // write 0x00000000 - 0x00001FFF 2048 ~ 3071
+    // write 0xC0000000 - 0xC0001FFF 3072 ~ 4095
+#define SetWriteBitmap(map, bit) \
+            *((PCHAR)(map) + \
+                (((bit) & 0xC0000000) ? 0xc00 : 0x800) + \
+                    (((bit) & 0x1FFF) >> 3)) |= 1 << ((bit) & 7);
+
+#define SetBitmap(map, bit) { \
+            SetReadBitmap(map, bit); \
+            SetWriteBitmap(map, bit); \
+            }
+
+    SetBitmap(CurrentBlock->Region.Bitmap, IA32_SYSENTER_CS);
+    SetBitmap(CurrentBlock->Region.Bitmap, IA32_SYSENTER_ESP);
+    SetBitmap(CurrentBlock->Region.Bitmap, IA32_SYSENTER_EIP);
+    SetBitmap(CurrentBlock->Region.Bitmap, IA32_FS_BASE);
+    SetBitmap(CurrentBlock->Region.Bitmap, IA32_GS_BASE);
+
     __vmx_vmwrite_common(VMX_MSR_BITMAP, CurrentBlock->Bitmap.QuadPart);
+
+    CurrentBlock->ExceptionBitmap.LowPart |= 1UL << VECTOR_NMI;
+    CurrentBlock->ExceptionBitmap.LowPart |= 1UL << VECTOR_DB;
+    CurrentBlock->ExceptionBitmap.LowPart |= 1UL << VECTOR_BP;
+
+    __vmx_vmwrite_common(VMX_EXCEPTION_BITMAP, CurrentBlock->ExceptionBitmap.QuadPart);
+    
     __vmx_vmwrite_common(VMX_TSC_OFFSET, 0);
 
     if (CurrentBlock->VmxInfo.BaseInfo & (1ULL << 55)) {
@@ -576,7 +608,6 @@ __vmx_entry(
             CurrentBlock->VmxInfo.SecondaryFixed.LowPart);
     }
 
-    CurrentBlock->VmxInfo.Pin.LowPart |= 0;
     CurrentBlock->VmxInfo.Pin.LowPart &= CurrentBlock->VmxInfo.PinFixed.HighPart;
     CurrentBlock->VmxInfo.Pin.LowPart |= CurrentBlock->VmxInfo.PinFixed.LowPart;
 
@@ -615,30 +646,12 @@ __vmx_entry(
         CurrentBlock->VmxInfo.Primary.HighPart,
         CurrentBlock->VmxInfo.Primary.LowPart);
 
-#ifndef _WIN64
-    CurrentBlock->VmxInfo.Exit.LowPart |= 0;
-    CurrentBlock->VmxInfo.Exit.LowPart &= CurrentBlock->VmxInfo.ExitFixed.HighPart;
-    CurrentBlock->VmxInfo.Exit.LowPart |= CurrentBlock->VmxInfo.ExitFixed.LowPart;
+    CurrentBlock->VmxInfo.Exit.LowPart |= ENTRY_CONTROL_LOAD_DEBUG_CONTROLS;
 
-    __vmx_vmwrite_common(VMX_EXIT_CONTROLS, CurrentBlock->VmxInfo.Exit.QuadPart);
-
-    DbgPrint(
-        "[Sefirot] [Daat] exit control < %08x | %08x >\n",
-        CurrentBlock->VmxInfo.Exit.HighPart,
-        CurrentBlock->VmxInfo.Exit.LowPart);
-
-    CurrentBlock->VmxInfo.Entry.LowPart |= 0;
-    CurrentBlock->VmxInfo.Entry.LowPart &= CurrentBlock->VmxInfo.EntryFixed.HighPart;
-    CurrentBlock->VmxInfo.Entry.LowPart |= CurrentBlock->VmxInfo.EntryFixed.LowPart;
-
-    __vmx_vmwrite_common(VMX_ENTRY_CONTROLS, CurrentBlock->VmxInfo.Entry.QuadPart);
-
-    DbgPrint(
-        "[Sefirot] [Daat] entry control < %08x | %08x >\n",
-        CurrentBlock->VmxInfo.Entry.HighPart,
-        CurrentBlock->VmxInfo.Entry.LowPart);
-#else
+#ifdef _WIN64
     CurrentBlock->VmxInfo.Exit.LowPart |= EXIT_CONTROL_HOST_ADDR_SPACE_SIZE;
+#endif // _WIN64
+
     CurrentBlock->VmxInfo.Exit.LowPart &= CurrentBlock->VmxInfo.ExitFixed.HighPart;
     CurrentBlock->VmxInfo.Exit.LowPart |= CurrentBlock->VmxInfo.ExitFixed.LowPart;
 
@@ -649,7 +662,12 @@ __vmx_entry(
         CurrentBlock->VmxInfo.Exit.HighPart,
         CurrentBlock->VmxInfo.Exit.LowPart);
 
+    CurrentBlock->VmxInfo.Entry.LowPart |= EXIT_CONTROL_SAVE_DEBUG_CONTROLS;
+
+#ifdef _WIN64
     CurrentBlock->VmxInfo.Entry.LowPart |= ENTRY_CONTROL_LONG_MODE_GUEST;
+#endif // _WIN64
+
     CurrentBlock->VmxInfo.Entry.LowPart &= CurrentBlock->VmxInfo.EntryFixed.HighPart;
     CurrentBlock->VmxInfo.Entry.LowPart |= CurrentBlock->VmxInfo.EntryFixed.LowPart;
 
@@ -659,7 +677,6 @@ __vmx_entry(
         "[Sefirot] [Daat] entry control < %08x | %08x >\n",
         CurrentBlock->VmxInfo.Entry.HighPart,
         CurrentBlock->VmxInfo.Entry.LowPart);
-#endif // !_WIN64
 
     Result = __vmx_vmlaunch();
 

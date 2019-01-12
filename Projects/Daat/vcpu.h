@@ -280,8 +280,8 @@ extern "C" {
                 ULONG Dr1;
                 ULONG Dr2;
                 ULONG Dr3;
-                ULONG Dr4;
-                ULONG Dr5;
+                ULONG NOTHING : 32;
+                ULONG NOTHING : 32;
                 ULONG Dr6;
                 ULONG Dr7;
             };
@@ -355,8 +355,6 @@ extern "C" {
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr1) == 0x2c);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr2) == 0x30);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr3) == 0x34);
-    C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr4) == 0x38);
-    C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr5) == 0x3c);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr6) == 0x40);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr7) == 0x44);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, SegEs) == 0x48);
@@ -571,8 +569,8 @@ extern "C" {
                 ULONG64 Dr1;
                 ULONG64 Dr2;
                 ULONG64 Dr3;
-                ULONG64 Dr4;
-                ULONG64 Dr5;
+                ULONG64 NOTHING : 64;
+                ULONG64 NOTHING : 64;
                 ULONG64 Dr6;
                 ULONG64 Dr7;
             };
@@ -697,8 +695,6 @@ extern "C" {
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr1) == 0x1d0);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr2) == 0x1d8);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr3) == 0x1e0);
-    C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr4) == 0x1e8);
-    C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr5) == 0x1f0);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr6) == 0x1f8);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, Dr7) == 0x200);
     C_ASSERT(FIELD_OFFSET(REGISTERS_FRAME, SegEs) == 0x208);
@@ -784,6 +780,8 @@ extern "C" {
             VMX_VMCS Vmcs;
             UCHAR Bitmap[PAGE_SIZE];
         }Region;
+
+        ULARGE_INTEGER ExceptionBitmap;
 
         CPU_FEATURE Feature;
         VMX_INFO VmxInfo;
