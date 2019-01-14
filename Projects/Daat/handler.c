@@ -69,6 +69,35 @@ __inject_exception(
 
 VOID
 NTAPI
+BreakPatchGuard(
+    __inout PCCB Block
+)
+{
+#ifdef _WIN64
+    UCHAR Sig[] = { 0x41, 0x0f, 0x23, 0xff, 0x0f, 0x01, 0x5d, 0x48 };
+
+    // patchguard code clear dr7
+
+    if (sizeof(Sig) == RtlCompareMemory(
+        (PCHAR)Block->GuestState.GuestRip,
+        Sig,
+        sizeof(Sig))) {
+        // restore idt
+        __vmx_vmwrite_common(GUEST_IDTR_BASE, (ULONG64)Block->Registers.Idtr.Base);
+        __vmx_vmwrite_common(GUEST_IDTR_LIMIT, Block->Registers.Idtr.Limit);
+
+        // use hardware breakpoint
+        //__ops_writedr(0, Block->GuestState.GuestRip + Block->GuestState.InstructionLength);
+        //__ops_writedr(6, DR6_SETBITS | (1 << 0));
+        //__vmx_vmwrite_common(GUEST_DR7, DR7_SETBITS | (1 << 0));
+
+        __inject_exception(Block, VECTOR_DB, NO_ERROR_CODE, EXCEPTION);
+    }
+#endif // _WIN64
+}
+
+VOID
+NTAPI
 __vm_exception_nmi(
     __inout PCCB Block
 )
@@ -253,7 +282,9 @@ __vm_dr_access(
     __vmx_vmread_common(GUEST_DR7, &Block->Registers.Dr7);
 
     if (DR7_GD == (Block->Registers.Dr7 & DR7_GD)) {
-        Block->Registers.Dr6 = __ops_readdr(6) | DR6_BD;
+        Block->Registers.Dr6 = __ops_readdr(6);
+
+        Block->Registers.Dr6 |= DR6_BD;
 
         __ops_writedr(6, Block->Registers.Dr6);
 
@@ -264,15 +295,14 @@ __vm_dr_access(
         Block->GuestState.InstructionLength = 0;
 
         __inject_exception(Block, VECTOR_DB, NO_ERROR_CODE, EXCEPTION);
-
-        return;
     }
     else {
         __vmx_vmread_common(
             VM_EXIT_INFO_QUALIFICATION,
             &Block->GuestState.Qualification);
 
-        if (4 == Block->GuestState.Qualification.DR.Number) {
+        if (4 == Block->GuestState.Qualification.DR.Number ||
+            5 == Block->GuestState.Qualification.DR.Number) {
             if (CR4_DE == (Block->Registers.Cr4 & CR4_DE)) {
                 Block->GuestState.InstructionLength = 0;
 
@@ -282,22 +312,9 @@ __vm_dr_access(
             }
             else {
                 // Dr4 <==> Dr6
-
-                Block->GuestState.Qualification.DR.Number = 6;
-            }
-        }
-        if (5 == Block->GuestState.Qualification.DR.Number) {
-            if (CR4_DE == (Block->Registers.Cr4 & CR4_DE)) {
-                Block->GuestState.InstructionLength = 0;
-
-                __inject_exception(Block, VECTOR_UD, NO_ERROR_CODE, EXCEPTION);
-
-                return;
-            }
-            else {
                 // Dr5 <==> Dr7
 
-                Block->GuestState.Qualification.DR.Number = 7;
+                Block->GuestState.Qualification.DR.Number += 2;
             }
         }
 
@@ -325,6 +342,8 @@ __vm_dr_access(
             }
             else {
                 __vmx_vmwrite_common(GUEST_DR7, Block->Registers.Dr7);
+
+                // BreakPatchGuard(Block);
             }
         }
     }
