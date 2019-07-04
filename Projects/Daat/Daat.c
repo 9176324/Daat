@@ -22,98 +22,7 @@
 #include "Daat.h"
 
 #include "handler.h"
-#include "vcpu.h"
 #include "vmx.h"
-
-VOID
-NTAPI
-VmxStartProcessors(
-    __in struct _KDPC * Dpc,
-    __in PVOID DeferredContext,
-    __in PVOID SystemArgument1,
-    __in PVOID SystemArgument2
-)
-{
-    PCCB DpcNotify = NULL;
-    PCCB CurrentBlock = NULL;
-
-    CurrentBlock = DeferredContext;
-
-#ifndef PUBLIC
-    DbgPrint(
-        "[Sefirot] [Daat] < %p : %p > current processor\n",
-        KeGetCurrentProcessorNumber(),
-        CurrentBlock);
-#endif // !PUBLIC
-
-    __vmx_start(&CurrentBlock->Registers);
-
-    DpcNotify = SystemArgument1;
-
-    KeSetEvent(DpcNotify, LOW_PRIORITY, FALSE);
-}
-
-VOID
-NTAPI
-VmxStartAllProcessors(
-    __in PKEVENT Notify
-)
-{
-    UNICODE_STRING RoutineString = { 0 };
-    PCCHAR NumberProcessors = NULL;
-    CHAR Index = 0;
-    KEVENT DpcNotify = { 0 };
-    KDPC Dpc = { 0 };
-    PCCB ControlBlock = NULL;
-    PCCB CurrentBlock = NULL;
-
-    RtlInitUnicodeString(&RoutineString, L"KeNumberProcessors");
-
-    NumberProcessors = MmGetSystemRoutineAddress(&RoutineString);
-
-    ControlBlock = ExAllocatePool(
-        NonPagedPool,
-        *NumberProcessors * sizeof(CCB));
-
-    if (NULL != ControlBlock) {
-        RtlZeroMemory(
-            ControlBlock,
-            *NumberProcessors * sizeof(CCB));
-
-        for (Index = 0;
-            Index < *NumberProcessors;
-            Index++) {
-            CurrentBlock = ControlBlock + Index;
-
-            KeInitializeEvent(
-                &DpcNotify,
-                SynchronizationEvent,
-                FALSE);
-
-            KeInitializeDpc(
-                &Dpc,
-                VmxStartProcessors,
-                CurrentBlock);
-
-            KeSetTargetProcessorDpc(&Dpc, Index);
-            KeSetImportanceDpc(&Dpc, HighImportance);
-
-            if (FALSE != KeInsertQueueDpc(
-                &Dpc,
-                &DpcNotify,
-                NULL)) {
-                KeWaitForSingleObject(
-                    &DpcNotify,
-                    Executive,
-                    KernelMode,
-                    FALSE,
-                    NULL);
-            }
-        }
-    }
-
-    KeSetEvent(Notify, LOW_PRIORITY, FALSE);
-}
 
 VOID
 NTAPI
@@ -216,7 +125,7 @@ DriverEntry(
 
 #ifndef PUBLIC
             DbgPrint(
-                "[Sefirot] [Daat] load\n");
+                "[Daat] load\n");
 #endif // !PUBLIC
         }
         else {
@@ -240,7 +149,7 @@ DriverUnload(
     IoDeleteDevice(DriverObject->DeviceObject);
 
 #ifndef VMP
-    DbgPrint("Shark - unload\n");
+    DbgPrint("[Daat] unload\n");
 #endif // !VMP
 }
 

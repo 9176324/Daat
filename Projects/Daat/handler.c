@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -19,9 +19,37 @@
 #include <defs.h>
 
 #include "handler.h"
-
-#include "vcpu.h"
 #include "vmx.h"
+
+VOID
+NTAPI
+BreakPatchGuard(
+    __inout PCCB Block
+)
+{
+#ifdef _WIN64
+    UCHAR Signature[] = { 0x41, 0x0f, 0x23, 0xff, 0x0f, 0x01, 0x5d };
+
+    // patchguard code clear dr7
+
+    if (sizeof(Signature) == RtlCompareMemory(
+        (PCHAR)Block->GuestState.GuestRip,
+        Signature,
+        sizeof(Signature))) {
+        // restore idt
+        __vmx_vmwrite_common(GUEST_IDTR_BASE, (ULONG64)Block->Registers.Idtr.Base);
+        __vmx_vmwrite_common(GUEST_IDTR_LIMIT, Block->Registers.Idtr.Limit);
+        __vmx_vmwrite_common(GUEST_DR7, DR7_SETBITS);
+
+        // use hardware breakpoint
+        // __ops_writedr(0, Block->GuestState.GuestRip + Block->GuestState.InstructionLength);
+        // __ops_writedr(6, DR6_SETBITS | (1 << 0));
+        // __vmx_vmwrite_common(GUEST_DR7, DR7_SETBITS | (1 << 0));
+
+        __inject_exception(Block, VECTOR_BP, NO_ERROR_CODE, EXCEPTION);
+    }
+#endif // _WIN64
+}
 
 VOID
 NTAPI
@@ -65,35 +93,6 @@ __inject_exception(
     __vmx_vmwrite(
         VMX_ENTRY_INSTRUCTION_LENGTH,
         Block->GuestState.InstructionLength);
-}
-
-VOID
-NTAPI
-BreakPatchGuard(
-    __inout PCCB Block
-)
-{
-#ifdef _WIN64
-    UCHAR Sig[] = { 0x41, 0x0f, 0x23, 0xff, 0x0f, 0x01, 0x5d, 0x48 };
-
-    // patchguard code clear dr7
-
-    if (sizeof(Sig) == RtlCompareMemory(
-        (PCHAR)Block->GuestState.GuestRip,
-        Sig,
-        sizeof(Sig))) {
-        // restore idt
-        __vmx_vmwrite_common(GUEST_IDTR_BASE, (ULONG64)Block->Registers.Idtr.Base);
-        __vmx_vmwrite_common(GUEST_IDTR_LIMIT, Block->Registers.Idtr.Limit);
-
-        // use hardware breakpoint
-        //__ops_writedr(0, Block->GuestState.GuestRip + Block->GuestState.InstructionLength);
-        //__ops_writedr(6, DR6_SETBITS | (1 << 0));
-        //__vmx_vmwrite_common(GUEST_DR7, DR7_SETBITS | (1 << 0));
-
-        __inject_exception(Block, VECTOR_DB, NO_ERROR_CODE, EXCEPTION);
-    }
-#endif // _WIN64
 }
 
 VOID
@@ -343,7 +342,7 @@ __vm_dr_access(
             else {
                 __vmx_vmwrite_common(GUEST_DR7, Block->Registers.Dr7);
 
-                // BreakPatchGuard(Block);
+                BreakPatchGuard(Block);
             }
         }
     }
@@ -358,6 +357,12 @@ __vm_msr_read(
     ULARGE_INTEGER Msr = { 0 };
 
     switch (Block->Registers.Ecx) {
+    case IA32_DEBUGCTL: {
+        __vmx_vmread_common(GUEST_DEBUGCTL, &Msr.QuadPart);
+
+        break;
+    }
+
     case IA32_SYSENTER_CS: {
         __vmx_vmread_common(GUEST_SYSENTER_CS, &Msr.QuadPart);
 
@@ -384,6 +389,13 @@ __vm_msr_read(
 
     case IA32_GS_BASE: {
         __vmx_vmread_common(GUEST_GS_BASE, &Msr.QuadPart);
+
+        break;
+    }
+
+    case IA32_FEATURE_CONTROL: {
+        Msr.QuadPart = __ops_readmsr(Block->Registers.Ecx);
+        Msr.QuadPart &= ~FC_LOCKED;
 
         break;
     }
@@ -416,6 +428,12 @@ __vm_msr_write(
     Msr.HighPart = Block->Registers.Edx;
 
     switch (Block->Registers.Ecx) {
+    case IA32_DEBUGCTL: {
+        __vmx_vmwrite_common(GUEST_DEBUGCTL, Msr.QuadPart);
+
+        break;
+    }
+
     case IA32_SYSENTER_CS: {
         __vmx_vmwrite_common(GUEST_SYSENTER_CS, Msr.QuadPart);
 
@@ -442,6 +460,11 @@ __vm_msr_write(
 
     case IA32_GS_BASE: {
         __vmx_vmwrite_common(GUEST_GS_BASE, Msr.QuadPart);
+
+        break;
+    }
+
+    case IA32_FEATURE_CONTROL: {
 
         break;
     }
@@ -492,7 +515,7 @@ __vm_xsetbv(
     __ops_xsetbv(Block->Registers.Ecx, Xcr.QuadPart);
 }
 
-PVM_HANDLER Handlers[] = {
+PEXIT_HANDLER VmxHandlers[] = {
     __vm_exception_nmi, // [VMX_EXIT_INT_EXCEPTION_NMI] An SW interrupt, exception or NMI has occurred
     __vm_interrupt, // [VMX_EXIT_EXT_INTERRUPT] An external interrupt has occurred
     __vm_null, // [VMX_EXIT_TRIPLE_FAULT] Triple fault occurred
@@ -569,11 +592,13 @@ __vm_exit_dispatch(
     __vmx_vmread_common(VM_EXIT_INFO_REASON, &CurrentBlock->GuestState.Reason);
     __vmx_vmread_common(VM_EXIT_INFO_INSTRUCTION_LENGTH, &CurrentBlock->GuestState.InstructionLength);
 
-    Handlers[CurrentBlock->GuestState.Reason.BasicReason](CurrentBlock);
+    VmxHandlers[CurrentBlock->GuestState.Reason.BasicReason](CurrentBlock);
 
     CurrentBlock->GuestState.GuestRip += CurrentBlock->GuestState.InstructionLength;
 
     __vmx_vmwrite_common(GUEST_RIP, CurrentBlock->GuestState.GuestRip);
+    // __vmx_vmwrite_common(GUEST_IDTR_BASE, (ULONG64)CurrentBlock->Registers.Idtr.Base);
+    // __vmx_vmwrite_common(GUEST_IDTR_LIMIT, CurrentBlock->Registers.Idtr.Limit);
 
     RestoreRegisters(Registers);
 }

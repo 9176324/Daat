@@ -52,7 +52,6 @@ CCARCHOBJS =
 CCOBJS = \
     $(OBJD)\$(PROJ).obj \
     $(OBJD)\handler.obj \
-    $(OBJD)\vcpu.obj \
     $(OBJD)\vmx.obj
     
 RCOBJS = $(OBJD)\$(PROJ).res
@@ -63,7 +62,6 @@ PROJSRCS = \
     $(ARCTARG)\$(ARCTARG).asm \
     $(PROJ).c \
     handler.c \
-    vcpu.c \
     vmx.c
 
 !if "$(ARCTARG)" == "I386"

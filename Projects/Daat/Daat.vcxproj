@@ -100,7 +100,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Daat.c" />
-    <ClCompile Include="vcpu.c" />
     <ClCompile Include="handler.c" />
     <ClCompile Include="vmx.c" />
   </ItemGroup>
@@ -113,7 +112,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Daat.h" />
-    <ClInclude Include="vcpu.h" />
     <ClInclude Include="handler.h" />
     <ClInclude Include="vmx.h" />
   </ItemGroup>
