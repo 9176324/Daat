@@ -100,8 +100,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Daat.c" />
-    <ClCompile Include="handler.c" />
-    <ClCompile Include="vmx.c" />
+    <ClCompile Include="Vmx.c" />
+    <ClCompile Include="VmxHandler.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Daat.def" />
@@ -112,7 +112,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Daat.h" />
-    <ClInclude Include="handler.h" />
-    <ClInclude Include="vmx.h" />
+    <ClInclude Include="Vmx.h" />
+    <ClInclude Include="VmxHandler.h" />
   </ItemGroup>
 </Project>

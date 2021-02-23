@@ -9,6 +9,6 @@
     git clone https://github.com/9176324/WRK
     
 # Build sys
-    Method 1: open "D:\Labs\Daat\Daat.sln" with VisualStudio
+    Method 1: open "X:\Labs\Daat\Daat.sln" with VisualStudio
     Method 2: run Build.cmd
 	

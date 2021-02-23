@@ -24,10 +24,10 @@
     <ClCompile Include="Daat.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vmx.c">
+    <ClCompile Include="Vmx.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="handler.c">
+    <ClCompile Include="VmxHandler.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,10 +60,10 @@
     <ClInclude Include="Daat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vmx.h">
+    <ClInclude Include="Vmx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="handler.h">
+    <ClInclude Include="VmxHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

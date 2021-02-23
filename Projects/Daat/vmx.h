@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License") you may not use this file except in compliance with
@@ -27,7 +27,7 @@ extern "C" {
 #define CPUID_CACHE_SIZE 6
 
     typedef union _CPU_FEATURE {
-        ULONG Data[CPUID_CACHE_SIZE];
+        u32 Data[CPUID_CACHE_SIZE];
     } CPU_FEATURE, *PCPU_FEATURE;
 
 #define FEAT(feature, index, bit) ((((feature)->Data[index]) >> (bit)) & 1)
@@ -41,37 +41,37 @@ extern "C" {
     * Features for CPUID with EAX=01h stored in ECX
     */
 
-#define X86_FEATURE_SSE3(feature) FEAT(feature, 0, 0) /* 0x00000001 Streaming SIMD Extensions 3 */
-#define X86_FEATURE_PCLMULQDQ(feature) FEAT(feature, 0, 1) /* 0x00000002 PCLMULQDQ Instruction */
-#define X86_FEATURE_DTES64(feature) FEAT(feature, 0, 2) /* 0x00000004 64-bit DS Area */
-#define X86_FEATURE_MONITOR(feature) FEAT(feature, 0, 3) /* 0x00000008 MONITOR/MWAIT Instructions */
-#define X86_FEATURE_DS_CPL(feature) FEAT(feature, 0, 4) /* 0x00000010 CPL Qualified Debug Store */
-#define X86_FEATURE_VMX(feature) FEAT(feature, 0, 5) /* 0x00000020 Virtual Machine Extensions */
-#define X86_FEATURE_SMX(feature) FEAT(feature, 0, 6) /* 0x00000040 Safer Mode Extensions */
-#define X86_FEATURE_EIST(feature) FEAT(feature, 0, 7) /* 0x00000080 Enhanced Intel SpeedStep technology */
-#define X86_FEATURE_TM2(feature) FEAT(feature, 0, 8) /* 0x00000100 Thermal Monitor 2 */
-#define X86_FEATURE_SSSE3(feature) FEAT(feature, 0, 9) /* 0x00000200 Supplemental Streaming SIMD Extensions 3 */
-#define X86_FEATURE_CNXT_ID(feature) FEAT(feature, 0, 10) /* 0x00000400 L1 Context ID */
-#define X86_FEATURE_SDBG(feature) FEAT(feature, 0, 11) /* 0x00000800 Silicon Debug Interface */
-#define X86_FEATURE_FMA(feature) FEAT(feature, 0, 12) /* 0x00001000 Fused Multiply-Add */
-#define X86_FEATURE_CMPXCHG16B(feature) FEAT(feature, 0, 13) /* 0x00002000 CMPXCHG16B Instruction */
-#define X86_FEATURE_XTPR_UPDATE(feature) FEAT(feature, 0, 14) /* 0x00004000 xTPR Update Control */
-#define X86_FEATURE_PDCM(feature) FEAT(feature, 0, 15) /* 0x00008000 Perfmon and Debug Capability */
-#define X86_FEATURE_PCID(feature) FEAT(feature, 0, 17) /* 0x00020000 Process-context identifiers */
-#define X86_FEATURE_DCA(feature) FEAT(feature, 0, 18) /* 0x00040000 Direct feature access for DMA writes */
-#define X86_FEATURE_SSE41(feature) FEAT(feature, 0, 19) /* 0x00080000 Streaming SIMD Extensions 4.1 */
-#define X86_FEATURE_SSE42(feature) FEAT(feature, 0, 20) /* 0x00100000 Streaming SIMD Extensions 4.2 */
-#define X86_FEATURE_X2APIC(feature) FEAT(feature, 0, 21) /* 0x00200000 x2APIC support */
-#define X86_FEATURE_MOVBE(feature) FEAT(feature, 0, 22) /* 0x00400000 MOVBE Instruction */
-#define X86_FEATURE_POPCNT(feature) FEAT(feature, 0, 23) /* 0x00800000 POPCNT Instruction */
-#define X86_FEATURE_TSC_DEADLINE(feature) FEAT(feature, 0, 24) /* 0x01000000 APIC supports one-shot operation using TSC deadline */
-#define X86_FEATURE_AESNI(feature) FEAT(feature, 0, 25) /* 0x02000000 AESNI Extension */
-#define X86_FEATURE_XSAVE(feature) FEAT(feature, 0, 26) /* 0x04000000 XSAVE/XRSTOR/XSETBV/XGETBV Instructions and XCR0 */
-#define X86_FEATURE_OSXSAVE(feature) FEAT(feature, 0, 27) /* 0x08000000 XSAVE enabled by OS */
-#define X86_FEATURE_AVX(feature) FEAT(feature, 0, 28) /* 0x10000000 Advanced Vector Extensions */
-#define X86_FEATURE_F16C(feature) FEAT(feature, 0, 29) /* 0x20000000 16-bit Floating-Point Instructions */
-#define X86_FEATURE_RDRAND(feature) FEAT(feature, 0, 30) /* 0x40000000 RDRAND Instruction */
-#define X86_FEATURE_HYPERVISOR(feature) FEAT(feature, 0, 31) /* 0x80000000 Hypervisor Running */
+#define FEATURE_SSE3(feature) FEAT(feature, 0, 0) /* 0x00000001 Streaming SIMD Extensions 3 */
+#define FEATURE_PCLMULQDQ(feature) FEAT(feature, 0, 1) /* 0x00000002 PCLMULQDQ Instruction */
+#define FEATURE_DTES64(feature) FEAT(feature, 0, 2) /* 0x00000004 64-bit DS Area */
+#define FEATURE_MONITOR(feature) FEAT(feature, 0, 3) /* 0x00000008 MONITOR/MWAIT Instructions */
+#define FEATURE_DS_CPL(feature) FEAT(feature, 0, 4) /* 0x00000010 CPL Qualified Debug Store */
+#define FEATURE_VMX(feature) FEAT(feature, 0, 5) /* 0x00000020 Virtual Machine Extensions */
+#define FEATURE_SMX(feature) FEAT(feature, 0, 6) /* 0x00000040 Safer Mode Extensions */
+#define FEATURE_EIST(feature) FEAT(feature, 0, 7) /* 0x00000080 Enhanced Intel SpeedStep technology */
+#define FEATURE_TM2(feature) FEAT(feature, 0, 8) /* 0x00000100 Thermal Monitor 2 */
+#define FEATURE_SSSE3(feature) FEAT(feature, 0, 9) /* 0x00000200 Supplemental Streaming SIMD Extensions 3 */
+#define FEATURE_CNXT_ID(feature) FEAT(feature, 0, 10) /* 0x00000400 L1 Context ID */
+#define FEATURE_SDBG(feature) FEAT(feature, 0, 11) /* 0x00000800 Silicon Debug Interface */
+#define FEATURE_FMA(feature) FEAT(feature, 0, 12) /* 0x00001000 Fused Multiply-Add */
+#define FEATURE_CMPXCHG16B(feature) FEAT(feature, 0, 13) /* 0x00002000 CMPXCHG16B Instruction */
+#define FEATURE_XTPR_UPDATE(feature) FEAT(feature, 0, 14) /* 0x00004000 xTPR Update Control */
+#define FEATURE_PDCM(feature) FEAT(feature, 0, 15) /* 0x00008000 Perfmon and Debug Capability */
+#define FEATURE_PCID(feature) FEAT(feature, 0, 17) /* 0x00020000 Process-context identifiers */
+#define FEATURE_DCA(feature) FEAT(feature, 0, 18) /* 0x00040000 Direct feature access for DMA writes */
+#define FEATURE_SSE41(feature) FEAT(feature, 0, 19) /* 0x00080000 Streaming SIMD Extensions 4.1 */
+#define FEATURE_SSE42(feature) FEAT(feature, 0, 20) /* 0x00100000 Streaming SIMD Extensions 4.2 */
+#define FEATURE_X2APIC(feature) FEAT(feature, 0, 21) /* 0x00200000 x2APIC support */
+#define FEATURE_MOVBE(feature) FEAT(feature, 0, 22) /* 0x00400000 MOVBE Instruction */
+#define FEATURE_POPCNT(feature) FEAT(feature, 0, 23) /* 0x00800000 POPCNT Instruction */
+#define FEATURE_TSC_DEADLINE(feature) FEAT(feature, 0, 24) /* 0x01000000 APIC supports one-shot operation using TSC deadline */
+#define FEATURE_AESNI(feature) FEAT(feature, 0, 25) /* 0x02000000 AESNI Extension */
+#define FEATURE_XSAVE(feature) FEAT(feature, 0, 26) /* 0x04000000 XSAVE/XRSTOR/XSETBV/XGETBV Instructions and XCR0 */
+#define FEATURE_OSXSAVE(feature) FEAT(feature, 0, 27) /* 0x08000000 XSAVE enabled by OS */
+#define FEATURE_AVX(feature) FEAT(feature, 0, 28) /* 0x10000000 Advanced Vector Extensions */
+#define FEATURE_F16C(feature) FEAT(feature, 0, 29) /* 0x20000000 16-bit Floating-Point Instructions */
+#define FEATURE_RDRAND(feature) FEAT(feature, 0, 30) /* 0x40000000 RDRAND Instruction */
+#define FEATURE_HYPERVISOR(feature) FEAT(feature, 0, 31) /* 0x80000000 Hypervisor Running */
 
     /*
     * Intel SDM Vol. 2A: Table 3-11.
@@ -79,35 +79,35 @@ extern "C" {
     * Features for CPUID with EAX=01h stored in EDX
     */
 
-#define X86_FEATURE_FPU(feature) FEAT(feature, 1, 0) /* 0x00000001 Floating Point Unit On-Chip */
-#define X86_FEATURE_VME(feature) FEAT(feature, 1, 1) /* 0x00000002 Virtual 8086 Mode Enhancements */
-#define X86_FEATURE_DE(feature) FEAT(feature, 1, 2) /* 0x00000004 Debugging Extensions */
-#define X86_FEATURE_PSE(feature) FEAT(feature, 1, 3) /* 0x00000008 Page Size Extension */
-#define X86_FEATURE_TSC(feature) FEAT(feature, 1, 4) /* 0x00000010 Time Stamp Counter */
-#define X86_FEATURE_MSR(feature) FEAT(feature, 1, 5) /* 0x00000020 RDMSR/WRMSR Instructions */
-#define X86_FEATURE_PAE(feature) FEAT(feature, 1, 6) /* 0x00000040 Physical Address Extension */
-#define X86_FEATURE_MCE(feature) FEAT(feature, 1, 7) /* 0x00000080 Machine Check Exception */
-#define X86_FEATURE_CX8(feature) FEAT(feature, 1, 8) /* 0x00000100 CMPXCHG8B Instruction */
-#define X86_FEATURE_APIC(feature) FEAT(feature, 1, 9) /* 0x00000200 APIC On-Chip */
-#define X86_FEATURE_SEP(feature) FEAT(feature, 1, 11) /* 0x00000800 SYSENTER/SYSEXIT Instructions */
-#define X86_FEATURE_MTRR(feature) FEAT(feature, 1, 12) /* 0x00001000 Memory Type Range Registers */
-#define X86_FEATURE_PGE(feature) FEAT(feature, 1, 13) /* 0x00002000 Page Global Bit */
-#define X86_FEATURE_MCA(feature) FEAT(feature, 1, 14) /* 0x00004000 Machine Check Architecture */
-#define X86_FEATURE_CMOV(feature) FEAT(feature, 1, 15) /* 0x00008000 Conditional Move Instructions */
-#define X86_FEATURE_PAT(feature) FEAT(feature, 1, 16) /* 0x00010000 Page Attribute Table */
-#define X86_FEATURE_PSE36(feature) FEAT(feature, 1, 17) /* 0x00020000 36-Bit Page Size Extension */
-#define X86_FEATURE_PSN(feature) FEAT(feature, 1, 18) /* 0x00040000 Processor Serial Number */
-#define X86_FEATURE_CLFSH(feature) FEAT(feature, 1, 19) /* 0x00080000 CLFLUSH Instruction */
-#define X86_FEATURE_DS(feature) FEAT(feature, 1, 21) /* 0x00200000 Debug Store */
-#define X86_FEATURE_ACPI(feature) FEAT(feature, 1, 22) /* 0x00400000 Thermal Monitor and Software Controlled Clock Facilities */
-#define X86_FEATURE_MMX(feature) FEAT(feature, 1, 23) /* 0x00800000 Intel MMX Technology */
-#define X86_FEATURE_FXSR(feature) FEAT(feature, 1, 24) /* 0x01000000 FXSAVE and FXRSTOR Instructions */
-#define X86_FEATURE_SSE(feature) FEAT(feature, 1, 25) /* 0x02000000 Streaming SIMD Extensions */
-#define X86_FEATURE_SSE2(feature) FEAT(feature, 1, 26) /* 0x04000000 Streaming SIMD Extensions 2 */
-#define X86_FEATURE_SS(feature) FEAT(feature, 1, 27) /* 0x08000000 Self Snoop */
-#define X86_FEATURE_HTT(feature) FEAT(feature, 1, 28) /* 0x10000000 Max APIC IDs reserved field is Valid */
-#define X86_FEATURE_TM(feature) FEAT(feature, 1, 29) /* 0x20000000 Thermal Monitor */
-#define X86_FEATURE_PBE(feature) FEAT(feature, 1, 31) /* 0x80000000 Pending Break Enable */
+#define FEATURE_FPU(feature) FEAT(feature, 1, 0) /* 0x00000001 Floating Point Unit On-Chip */
+#define FEATURE_VME(feature) FEAT(feature, 1, 1) /* 0x00000002 Virtual 8086 Mode Enhancements */
+#define FEATURE_DE(feature) FEAT(feature, 1, 2) /* 0x00000004 Debugging Extensions */
+#define FEATURE_PSE(feature) FEAT(feature, 1, 3) /* 0x00000008 Page Size Extension */
+#define FEATURE_TSC(feature) FEAT(feature, 1, 4) /* 0x00000010 Time Stamp Counter */
+#define FEATURE_MSR(feature) FEAT(feature, 1, 5) /* 0x00000020 RDMSR/WRMSR Instructions */
+#define FEATURE_PAE(feature) FEAT(feature, 1, 6) /* 0x00000040 Physical Address Extension */
+#define FEATURE_MCE(feature) FEAT(feature, 1, 7) /* 0x00000080 Machine Check Exception */
+#define FEATURE_CX8(feature) FEAT(feature, 1, 8) /* 0x00000100 CMPXCHG8B Instruction */
+#define FEATURE_APIC(feature) FEAT(feature, 1, 9) /* 0x00000200 APIC On-Chip */
+#define FEATURE_SEP(feature) FEAT(feature, 1, 11) /* 0x00000800 SYSENTER/SYSEXIT Instructions */
+#define FEATURE_MTRR(feature) FEAT(feature, 1, 12) /* 0x00001000 Memory Type Range Registers */
+#define FEATURE_PGE(feature) FEAT(feature, 1, 13) /* 0x00002000 Page Global Bit */
+#define FEATURE_MCA(feature) FEAT(feature, 1, 14) /* 0x00004000 Machine Check Architecture */
+#define FEATURE_CMOV(feature) FEAT(feature, 1, 15) /* 0x00008000 Conditional Move Instructions */
+#define FEATURE_PAT(feature) FEAT(feature, 1, 16) /* 0x00010000 Page Attribute Table */
+#define FEATURE_PSE36(feature) FEAT(feature, 1, 17) /* 0x00020000 36-Bit Page Size Extension */
+#define FEATURE_PSN(feature) FEAT(feature, 1, 18) /* 0x00040000 Processor Serial Number */
+#define FEATURE_CLFSH(feature) FEAT(feature, 1, 19) /* 0x00080000 CLFLUSH Instruction */
+#define FEATURE_DS(feature) FEAT(feature, 1, 21) /* 0x00200000 Debug Store */
+#define FEATURE_ACPI(feature) FEAT(feature, 1, 22) /* 0x00400000 Thermal Monitor and Software Controlled Clock Facilities */
+#define FEATURE_MMX(feature) FEAT(feature, 1, 23) /* 0x00800000 Intel MMX Technology */
+#define FEATURE_FXSR(feature) FEAT(feature, 1, 24) /* 0x01000000 FXSAVE and FXRSTOR Instructions */
+#define FEATURE_SSE(feature) FEAT(feature, 1, 25) /* 0x02000000 Streaming SIMD Extensions */
+#define FEATURE_SSE2(feature) FEAT(feature, 1, 26) /* 0x04000000 Streaming SIMD Extensions 2 */
+#define FEATURE_SS(feature) FEAT(feature, 1, 27) /* 0x08000000 Self Snoop */
+#define FEATURE_HTT(feature) FEAT(feature, 1, 28) /* 0x10000000 Max APIC IDs reserved field is Valid */
+#define FEATURE_TM(feature) FEAT(feature, 1, 29) /* 0x20000000 Thermal Monitor */
+#define FEATURE_PBE(feature) FEAT(feature, 1, 31) /* 0x80000000 Pending Break Enable */
 
     /*
     * Intel SDM Vol. 2A: Table 3-8. Information Returned by CPUID Instruction
@@ -115,33 +115,33 @@ extern "C" {
     * Features for CPUID with EAX=07h, ECX=00h stored in EBX
     */
 
-#define X86_FEATURE_FSGSBASE(feature) FEAT(feature, 2, 0) /* 0x00000001 RDFSBASE/RDGSBASE/WRFSBASE/WRGSBASE supported */
-#define X86_FEATURE_TSC_ADJUST(feature) FEAT(feature, 2, 1) /* 0x00000002 MSR IA32_TSC_ADJUST supported */
-#define X86_FEATURE_SGX(feature) FEAT(feature, 2, 2) /* 0x00000004 Software Guard Extensions */
-#define X86_FEATURE_BMI1(feature) FEAT(feature, 2, 3) /* 0x00000008 Bit Manipulation Instruction Set 1 */
-#define X86_FEATURE_HLE(feature) FEAT(feature, 2, 4) /* 0x00000010 Transactional Synchronization Extensions */
-#define X86_FEATURE_AVX2(feature) FEAT(feature, 2, 5) /* 0x00000020 Advanced Vector Extensions 2 */
-#define X86_FEATURE_SMEP(feature) FEAT(feature, 2, 7) /* 0x00000080 Supervisor-Mode Execution Prevention */
-#define X86_FEATURE_BMI2(feature) FEAT(feature, 2, 8) /* 0x00000100 Bit Manipulation Instruction Set 2 */
-#define X86_FEATURE_INVPCID(feature) FEAT(feature, 2, 10) /* 0x00000400 INVPCID instruction */
-#define X86_FEATURE_RTM(feature) FEAT(feature, 2, 11) /* 0x00000800 Transactional Synchronization Extensions */
-#define X86_FEATURE_RDT_M(feature) FEAT(feature, 2, 12) /* 0x00001000 Resource Director Technology Monitoring */
-#define X86_FEATURE_MPX(feature) FEAT(feature, 2, 14) /* 0x00004000 Memory Protection Extensions */
-#define X86_FEATURE_RDT_A(feature) FEAT(feature, 2, 15) /* 0x00008000 Resource Director Technology Allocation */
-#define X86_FEATURE_AVX512F(feature) FEAT(feature, 2, 16) /* 0x00010000 AVX-512 Foundation */
-#define X86_FEATURE_AVX512DQ(feature) FEAT(feature, 2, 17) /* 0x00020000 AVX-512 Doubleword and Quadword Instructions */
-#define X86_FEATURE_RDSEED(feature) FEAT(feature, 2, 18) /* 0x00040000 RDSEED Instruction */
-#define X86_FEATURE_ADX(feature) FEAT(feature, 2, 19) /* 0x00080000 Multi-Precision Add-Carry Instruction Extensions */
-#define X86_FEATURE_SMAP(feature) FEAT(feature, 2, 20) /* 0x00100000 Supervisor Mode Access Prevention */
-#define X86_FEATURE_AVX512_IFMA(feature) FEAT(feature, 2, 21) /* 0x00200000 AVX-512 Integer Fused Multiply-Add Instructions */
-#define X86_FEATURE_CLFLUSHOPT(feature) FEAT(feature, 2, 23) /* 0x00800000 CLFLUSHOPT Instruction */
-#define X86_FEATURE_CLWB(feature) FEAT(feature, 2, 24) /* 0x01000000 CLWB Instruction */
-#define X86_FEATURE_AVX512PF(feature) FEAT(feature, 2, 26) /* 0x04000000 AVX-512 Prefetch Instructions */
-#define X86_FEATURE_AVX512ER(feature) FEAT(feature, 2, 27) /* 0x08000000 AVX-512 Exponential and Reciprocal Instructions */
-#define X86_FEATURE_AVX512CD(feature) FEAT(feature, 2, 28) /* 0x10000000 AVX-512 Conflict Detection Instructions*/
-#define X86_FEATURE_SHA(feature) FEAT(feature, 2, 29) /* 0x20000000 SHA Extension */
-#define X86_FEATURE_AVX512BW(feature) FEAT(feature, 2, 30) /* 0x40000000 AVX-512 Byte and Word Instructions */
-#define X86_FEATURE_AVX512VL(feature) FEAT(feature, 2, 31) /* 0x80000000 AVX-512 Vector Length Extensions */
+#define FEATURE_FSGSBASE(feature) FEAT(feature, 2, 0) /* 0x00000001 RDFSBASE/RDGSBASE/WRFSBASE/WRGSBASE supported */
+#define FEATURE_TSC_ADJUST(feature) FEAT(feature, 2, 1) /* 0x00000002 MSR IA32_TSC_ADJUST supported */
+#define FEATURE_SGX(feature) FEAT(feature, 2, 2) /* 0x00000004 Software Guard Extensions */
+#define FEATURE_BMI1(feature) FEAT(feature, 2, 3) /* 0x00000008 Bit Manipulation Instruction Set 1 */
+#define FEATURE_HLE(feature) FEAT(feature, 2, 4) /* 0x00000010 Transactional Synchronization Extensions */
+#define FEATURE_AVX2(feature) FEAT(feature, 2, 5) /* 0x00000020 Advanced Vector Extensions 2 */
+#define FEATURE_SMEP(feature) FEAT(feature, 2, 7) /* 0x00000080 Supervisor-Mode Execution Prevention */
+#define FEATURE_BMI2(feature) FEAT(feature, 2, 8) /* 0x00000100 Bit Manipulation Instruction Set 2 */
+#define FEATURE_INVPCID(feature) FEAT(feature, 2, 10) /* 0x00000400 INVPCID instruction */
+#define FEATURE_RTM(feature) FEAT(feature, 2, 11) /* 0x00000800 Transactional Synchronization Extensions */
+#define FEATURE_RDT_M(feature) FEAT(feature, 2, 12) /* 0x00001000 Resource Director Technology Monitoring */
+#define FEATURE_MPX(feature) FEAT(feature, 2, 14) /* 0x00004000 Memory Protection Extensions */
+#define FEATURE_RDT_A(feature) FEAT(feature, 2, 15) /* 0x00008000 Resource Director Technology Allocation */
+#define FEATURE_AVX512F(feature) FEAT(feature, 2, 16) /* 0x00010000 AVX-512 Foundation */
+#define FEATURE_AVX512DQ(feature) FEAT(feature, 2, 17) /* 0x00020000 AVX-512 Doubleword and Quadword Instructions */
+#define FEATURE_RDSEED(feature) FEAT(feature, 2, 18) /* 0x00040000 RDSEED Instruction */
+#define FEATURE_ADX(feature) FEAT(feature, 2, 19) /* 0x00080000 Multi-Precision Add-Carry Instruction Extensions */
+#define FEATURE_SMAP(feature) FEAT(feature, 2, 20) /* 0x00100000 Supervisor Mode Access Prevention */
+#define FEATURE_AVX512_IFMA(feature) FEAT(feature, 2, 21) /* 0x00200000 AVX-512 Integer Fused Multiply-Add Instructions */
+#define FEATURE_CLFLUSHOPT(feature) FEAT(feature, 2, 23) /* 0x00800000 CLFLUSHOPT Instruction */
+#define FEATURE_CLWB(feature) FEAT(feature, 2, 24) /* 0x01000000 CLWB Instruction */
+#define FEATURE_AVX512PF(feature) FEAT(feature, 2, 26) /* 0x04000000 AVX-512 Prefetch Instructions */
+#define FEATURE_AVX512ER(feature) FEAT(feature, 2, 27) /* 0x08000000 AVX-512 Exponential and Reciprocal Instructions */
+#define FEATURE_AVX512CD(feature) FEAT(feature, 2, 28) /* 0x10000000 AVX-512 Conflict Detection Instructions*/
+#define FEATURE_SHA(feature) FEAT(feature, 2, 29) /* 0x20000000 SHA Extension */
+#define FEATURE_AVX512BW(feature) FEAT(feature, 2, 30) /* 0x40000000 AVX-512 Byte and Word Instructions */
+#define FEATURE_AVX512VL(feature) FEAT(feature, 2, 31) /* 0x80000000 AVX-512 Vector Length Extensions */
 
     /*
     * Intel SDM Vol. 2A: Table 3-8. Information Returned by CPUID Instruction
@@ -149,12 +149,12 @@ extern "C" {
     * Features for CPUID with EAX=07h, ECX=00h stored in ECX
     */
 
-#define X86_FEATURE_PREFETCHWT1(feature) FEAT(feature, 3, 0) /* 0x00000001 PREFETCHWT1 Instruction */
-#define X86_FEATURE_AVX512_VBMI(feature) FEAT(feature, 3, 1) /* 0x00000002 AVX-512 Vector Bit Manipulation Instructions */
-#define X86_FEATURE_UMIP(feature) FEAT(feature, 3, 2) /* 0x00000004 User-Mode Instruction Prevention */
-#define X86_FEATURE_PKU(feature) FEAT(feature, 3, 3) /* 0x00000008 Protection Keys for User-mode pages */
-#define X86_FEATURE_OSPKE(feature) FEAT(feature, 3, 4) /* 0x00000010 PKU enabled by OS */
-#define X86_FEATURE_RDPID(feature) FEAT(feature, 3, 22) /* 0x00400000 RDPID Instruction and IA32_TSC_AUX MSR */
+#define FEATURE_PREFETCHWT1(feature) FEAT(feature, 3, 0) /* 0x00000001 PREFETCHWT1 Instruction */
+#define FEATURE_AVX512_VBMI(feature) FEAT(feature, 3, 1) /* 0x00000002 AVX-512 Vector Bit Manipulation Instructions */
+#define FEATURE_UMIP(feature) FEAT(feature, 3, 2) /* 0x00000004 User-Mode Instruction Prevention */
+#define FEATURE_PKU(feature) FEAT(feature, 3, 3) /* 0x00000008 Protection Keys for User-mode pages */
+#define FEATURE_OSPKE(feature) FEAT(feature, 3, 4) /* 0x00000010 PKU enabled by OS */
+#define FEATURE_RDPID(feature) FEAT(feature, 3, 22) /* 0x00400000 RDPID Instruction and IA32_TSC_AUX MSR */
 
     /*
     * Intel SDM Vol. 2A: Table 3-8. Information Returned by CPUID Instruction
@@ -162,8 +162,8 @@ extern "C" {
     * Features for CPUID with EAX=80000001h stored in ECX
     */
 
-#define X86_FEATURE_LAHF(feature) FEAT(feature, 4, 0) /* 0x00000001 LAHF/SAHF Instructions */
-#define X86_FEATURE_PREFETCHW(feature) FEAT(feature, 4, 8) /* 0x00000100 PREFETCH/PREFETCHW instructions */
+#define FEATURE_LAHF(feature) FEAT(feature, 4, 0) /* 0x00000001 LAHF/SAHF Instructions */
+#define FEATURE_PREFETCHW(feature) FEAT(feature, 4, 8) /* 0x00000100 PREFETCH/PREFETCHW instructions */
 
     /*
     * Intel SDM Vol. 2A: Table 3-8. Information Returned by CPUID Instruction
@@ -171,11 +171,11 @@ extern "C" {
     * Features for CPUID with EAX=80000001h stored in EDX
     */
 
-#define X86_FEATURE_SYSCALL(feature) FEAT(feature, 5, 11) /* 0x00000800 SYSCALL/SYSRET Instructions */
-#define X86_FEATURE_NX(feature) FEAT(feature, 5, 20) /* 0x00100000 No-Execute Bit */
-#define X86_FEATURE_PDPE1GB(feature) FEAT(feature, 5, 26) /* 0x04000000 Gibibyte pages */
-#define X86_FEATURE_RDTSCP(feature) FEAT(feature, 5, 27) /* 0x08000000 RDTSCP Instruction */
-#define X86_FEATURE_EM64T(feature) FEAT(feature, 5, 29) /* 0x20000000 Long Mode */
+#define FEATURE_SYSCALL(feature) FEAT(feature, 5, 11) /* 0x00000800 SYSCALL/SYSRET Instructions */
+#define FEATURE_NX(feature) FEAT(feature, 5, 20) /* 0x00100000 No-Execute Bit */
+#define FEATURE_PDPE1GB(feature) FEAT(feature, 5, 26) /* 0x04000000 Gibibyte pages */
+#define FEATURE_RDTSCP(feature) FEAT(feature, 5, 27) /* 0x08000000 RDTSCP Instruction */
+#define FEATURE_EM64T(feature) FEAT(feature, 5, 29) /* 0x20000000 Long Mode */
 
 #ifndef _WIN64
     typedef struct DECLSPEC_ALIGN(16) _REGISTERS_FRAME {
@@ -184,68 +184,68 @@ extern "C" {
         //
 
         union {
-            ULONG Reg[8];
+            u32 Reg[8];
 
             struct {
                 union {
-                    ULONG Eax;
-                    USHORT Ax;
+                    u32 Eax;
+                    u16 Ax;
 
                     struct {
-                        UCHAR Al;
-                        UCHAR Ah;
+                        u8 Al;
+                        u8 Ah;
                     };
                 };
 
                 union {
-                    ULONG Ecx;
-                    USHORT Cx;
+                    u32 Ecx;
+                    u16 Cx;
 
                     struct {
-                        UCHAR Cl;
-                        UCHAR Ch;
+                        u8 Cl;
+                        u8 Ch;
                     };
                 };
 
                 union {
-                    ULONG Edx;
-                    USHORT Dx;
+                    u32 Edx;
+                    u16 Dx;
 
                     struct {
-                        UCHAR Dl;
-                        UCHAR Dh;
+                        u8 Dl;
+                        u8 Dh;
                     };
                 };
 
                 union {
-                    ULONG Ebx;
-                    USHORT Bx;
+                    u32 Ebx;
+                    u16 Bx;
 
                     struct {
-                        UCHAR Bl;
-                        UCHAR Bh;
+                        u8 Bl;
+                        u8 Bh;
                     };
                 };
 
                 union {
-                    ULONG Esp;
-                    USHORT Sp;
-                    ULONG StackPointer;
+                    u32 Esp;
+                    u16 Sp;
+                    u32 StackPointer;
                 };
 
                 union {
-                    ULONG Ebp;
-                    USHORT Bp;
+                    u32 Ebp;
+                    u16 Bp;
                 };
 
                 union {
-                    ULONG Esi;
-                    USHORT Si;
+                    u32 Esi;
+                    u16 Si;
                 };
 
                 union {
-                    ULONG Edi;
-                    USHORT Di;
+                    u32 Edi;
+                    u16 Di;
                 };
             };
         };
@@ -255,32 +255,32 @@ extern "C" {
         //
 
         union {
-            ULONG Eip;
-            ULONG ProgramCounter;
+            u32 Eip;
+            u32 ProgramCounter;
         };
 
         //
         // Control flags.
         //
 
-        ULONG EFlags;
+        u32 EFlags;
 
         //
         // Debug registers
         //
 
         union {
-            ULONG Dr[8];
+            u32 Dr[8];
 
             struct {
-                ULONG Dr0;
-                ULONG Dr1;
-                ULONG Dr2;
-                ULONG Dr3;
-                ULONG NOTHING : 32;
-                ULONG NOTHING : 32;
-                ULONG Dr6;
-                ULONG Dr7;
+                u32 Dr0;
+                u32 Dr1;
+                u32 Dr2;
+                u32 Dr3;
+                u32 NOTHING : 32;
+                u32 NOTHING : 32;
+                u32 Dr6;
+                u32 Dr7;
             };
         };
 
@@ -288,15 +288,15 @@ extern "C" {
         // Segment Registers and processor flags.
         //
 
-        USHORT SegEs;
-        USHORT SegCs;
-        USHORT SegSs;
-        USHORT SegDs;
-        USHORT SegFs;
-        USHORT SegGs;
+        u16 SegEs;
+        u16 SegCs;
+        u16 SegSs;
+        u16 SegDs;
+        u16 SegFs;
+        u16 SegGs;
 
-        USHORT Ldtr;
-        USHORT Tr;
+        u16 Ldtr;
+        u16 Tr;
 
         KDESCRIPTOR Gdtr;
         KDESCRIPTOR Idtr;
@@ -306,14 +306,14 @@ extern "C" {
         //
 
         union {
-            ULONG Cr[5];
+            u32 Cr[5];
 
             struct {
-                ULONG Cr0;
-                ULONG NOTHING : 32;
-                ULONG Cr2;
-                ULONG Cr3;
-                ULONG Cr4;
+                u32 Cr0;
+                u32 NOTHING : 32;
+                u32 Cr2;
+                u32 Cr3;
+                u32 Cr4;
             };
         };
     } REGISTERS_FRAME, *PREGISTERS_FRAME;
@@ -380,128 +380,128 @@ extern "C" {
         // context record in the future.
         //
 
-        ULONG64 P1Home;
-        ULONG64 P2Home;
-        ULONG64 P3Home;
-        ULONG64 P4Home;
-        ULONG64 P5Home;
-        ULONG64 P6Home;
+        u64 P1Home;
+        u64 P2Home;
+        u64 P3Home;
+        u64 P4Home;
+        u64 P5Home;
+        u64 P6Home;
 
         //
         // Integer registers.
         //
 
         union {
-            ULONG64 Reg[16];
+            u64 Reg[16];
 
             struct {
                 union {
-                    ULONG64 Rax;
-                    ULONG Eax;
-                    USHORT Ax;
+                    u64 Rax;
+                    u32 Eax;
+                    u16 Ax;
 
                     struct {
-                        UCHAR Al;
-                        UCHAR Ah;
+                        u8 Al;
+                        u8 Ah;
                     };
                 };
 
                 union {
-                    ULONG64 Rcx;
-                    ULONG Ecx;
-                    USHORT Cx;
+                    u64 Rcx;
+                    u32 Ecx;
+                    u16 Cx;
 
                     struct {
-                        UCHAR Cl;
-                        UCHAR Ch;
+                        u8 Cl;
+                        u8 Ch;
                     };
                 };
 
                 union {
-                    ULONG64 Rdx;
-                    ULONG Edx;
-                    USHORT Dx;
+                    u64 Rdx;
+                    u32 Edx;
+                    u16 Dx;
 
                     struct {
-                        UCHAR Dl;
-                        UCHAR Dh;
+                        u8 Dl;
+                        u8 Dh;
                     };
                 };
 
                 union {
-                    ULONG64 Rbx;
-                    ULONG Ebx;
-                    USHORT Bx;
+                    u64 Rbx;
+                    u32 Ebx;
+                    u16 Bx;
 
                     struct {
-                        UCHAR Bl;
-                        UCHAR Bh;
+                        u8 Bl;
+                        u8 Bh;
                     };
                 };
 
                 union {
-                    ULONG64 Rsp;
-                    ULONG Esp;
-                    USHORT Sp;
-                    ULONG64 StackPointer;
+                    u64 Rsp;
+                    u32 Esp;
+                    u16 Sp;
+                    u64 StackPointer;
                 };
 
                 union {
-                    ULONG64 Rbp;
-                    ULONG Ebp;
-                    USHORT Bp;
+                    u64 Rbp;
+                    u32 Ebp;
+                    u16 Bp;
                 };
 
                 union {
-                    ULONG64 Rsi;
-                    ULONG Esi;
-                    USHORT Si;
+                    u64 Rsi;
+                    u32 Esi;
+                    u16 Si;
                 };
 
                 union {
-                    ULONG64 Rdi;
-                    ULONG Edi;
-                    USHORT Di;
+                    u64 Rdi;
+                    u32 Edi;
+                    u16 Di;
                 };
 
                 union {
-                    ULONG64 R8;
-                    ULONG R8d;
+                    u64 R8;
+                    u32 R8d;
                 };
 
                 union {
-                    ULONG64 R9;
-                    ULONG R9d;
+                    u64 R9;
+                    u32 R9d;
                 };
 
                 union {
-                    ULONG64 R10;
-                    ULONG R10d;
+                    u64 R10;
+                    u32 R10d;
                 };
 
                 union {
-                    ULONG64 R11;
-                    ULONG R11d;
+                    u64 R11;
+                    u32 R11d;
                 };
 
                 union {
-                    ULONG64 R12;
-                    ULONG R12d;
+                    u64 R12;
+                    u32 R12d;
                 };
 
                 union {
-                    ULONG64 R13;
-                    ULONG R13d;
+                    u64 R13;
+                    u32 R13d;
                 };
 
                 union {
-                    ULONG64 R14;
-                    ULONG R14d;
+                    u64 R14;
+                    u32 R14d;
                 };
 
                 union {
-                    ULONG64 R15;
-                    ULONG R15d;
+                    u64 R15;
+                    u32 R15d;
                 };
             };
         };
@@ -511,15 +511,15 @@ extern "C" {
         //
 
         union {
-            ULONG64 Rip;
-            ULONG64 ProgramCounter;
+            u64 Rip;
+            u64 ProgramCounter;
         };
 
         //
         // Control flags.
         //
 
-        ULONG EFlags;
+        u32 EFlags;
 
         //
         // Floating point state.
@@ -552,24 +552,24 @@ extern "C" {
         // Control flags.
         //
 
-        ULONG MxCsr;
+        u32 MxCsr;
 
         //
         // Debug registers
         //
 
         union {
-            ULONG64 Dr[8];
+            u64 Dr[8];
 
             struct {
-                ULONG64 Dr0;
-                ULONG64 Dr1;
-                ULONG64 Dr2;
-                ULONG64 Dr3;
-                ULONG64 NOTHING : 64;
-                ULONG64 NOTHING : 64;
-                ULONG64 Dr6;
-                ULONG64 Dr7;
+                u64 Dr0;
+                u64 Dr1;
+                u64 Dr2;
+                u64 Dr3;
+                u64 NOTHING : 64;
+                u64 NOTHING : 64;
+                u64 Dr6;
+                u64 Dr7;
             };
         };
 
@@ -577,15 +577,15 @@ extern "C" {
         // Segment Registers and processor flags.
         //
 
-        USHORT SegEs;
-        USHORT SegCs;
-        USHORT SegSs;
-        USHORT SegDs;
-        USHORT SegFs;
-        USHORT SegGs;
+        u16 SegEs;
+        u16 SegCs;
+        u16 SegSs;
+        u16 SegDs;
+        u16 SegFs;
+        u16 SegGs;
 
-        USHORT Ldtr;
-        USHORT Tr;
+        u16 Ldtr;
+        u16 Tr;
 
         KDESCRIPTOR Gdtr;
         KDESCRIPTOR Idtr;
@@ -595,18 +595,18 @@ extern "C" {
         //
 
         union {
-            ULONG64 Cr[9];
+            u64 Cr[9];
 
             struct {
-                ULONG64 Cr0;
-                ULONG64 NOTHING : 64;
-                ULONG64 Cr2;
-                ULONG64 Cr3;
-                ULONG64 Cr4;
-                ULONG64 NOTHING : 64;
-                ULONG64 NOTHING : 64;
-                ULONG64 NOTHING : 64;
-                ULONG64 Cr8;
+                u64 Cr0;
+                u64 NOTHING : 64;
+                u64 Cr2;
+                u64 Cr3;
+                u64 Cr4;
+                u64 NOTHING : 64;
+                u64 NOTHING : 64;
+                u64 NOTHING : 64;
+                u64 Cr8;
             };
         };
     } REGISTERS_FRAME, *PREGISTERS_FRAME;
@@ -714,97 +714,97 @@ extern "C" {
     C_ASSERT(sizeof(REGISTERS_FRAME) == 0x280);
 #endif // !_WIN64
 
-    VOID
+    void
         NTAPI
         ReadCpuFeature(
             __in PCPU_FEATURE Feature
         );
 
-    VOID
+    void
         NTAPI
         CaptureRegisters(
             __out PREGISTERS_FRAME Registers
         );
 
-    VOID
+    void
         NTAPI
         RestoreRegisters(
             __in PREGISTERS_FRAME Registers
         );
 
-    ULONG
+    u32
         NTAPI
         __ops_sldt(
-            __in PUSHORT Selector
+            __in u16ptr Selector
         );
 
-    ULONG
+    u32
         NTAPI
         __ops_str(
-            __in PUSHORT Selector
+            __in u16ptr Selector
         );
 
-    ULONG
+    u32
         NTAPI
         __ops_sgdt(
-            __in PUSHORT Limit
+            __in u16ptr Limit
         );
 
-    ULONG
+    u32
         NTAPI
         __ops_lgdt(
-            __in PUSHORT Limit
+            __in u16ptr Limit
         );
 
-    ULONG
+    u32
         NTAPI
         __ops_sidt(
-            __in PUSHORT Limit
+            __in u16ptr Limit
         );
 
-    ULONG
+    u32
         NTAPI
         __ops_lidt(
-            __in PUSHORT Limit
+            __in u16ptr Limit
         );
 
-    ULONG64
+    u64
         NTAPI
         __ops_readmsr(
-            __in ULONG Register
+            __in u32 Register
         );
 
-    VOID
+    void
         NTAPI
         __ops_writemsr(
-            __in ULONG Register,
-            __in ULONG64 Value
+            __in u32 Register,
+            __in u64 Value
         );
 
-    SIZE_T
+    u
         NTAPI
         __ops_readcr(
-            __in ULONG Register
+            __in u32 Register
         );
 
-    VOID
+    void
         NTAPI
         __ops_writecr(
-            __in ULONG Register,
-            __in SIZE_T Value
+            __in u32 Register,
+            __in u Value
         );
 
-    SIZE_T
+    u
         NTAPI
         __ops_readdr(
-            __in ULONG Register
+            __in u32 Register
         );
 
-    VOID
+    void
         NTAPI
         __ops_writedr(
-            __in ULONG Register,
-            __in SIZE_T Value
+            __in u32 Register,
+            __in u Value
         );
 
 #define VMCS_NONE 0xFFFFFFFFFFFFFFFF
@@ -832,16 +832,16 @@ extern "C" {
         VMX_EXIT_RDPMC = 15, // Guest executed RDPMC instruction
         VMX_EXIT_RDTSC = 16, // Guest executed RDTSC instruction
         VMX_EXIT_RSM = 17, // Guest executed RSM instruction in SMM
-        VMX_EXIT_VMCALL = 18,
-        VMX_EXIT_VMCLEAR = 19,
-        VMX_EXIT_VMLAUNCH = 20,
-        VMX_EXIT_VMPTRLD = 21,
-        VMX_EXIT_VMPTRST = 22,
-        VMX_EXIT_VMREAD = 23,
-        VMX_EXIT_VMRESUME = 24,
-        VMX_EXIT_VMWRITE = 25,
-        VMX_EXIT_VMXOFF = 26,
-        VMX_EXIT_VMXON = 27,
+        VMX_EXIT_VMCALL = 18, // Guest executed VMCALL instruction
+        VMX_EXIT_VMCLEAR = 19, // Guest executed VMCLEAR instruction
+        VMX_EXIT_VMLAUNCH = 20, // Guest executed VMLAUNCH instruction
+        VMX_EXIT_VMPTRLD = 21, // Guest executed VMPTRLD instruction
+        VMX_EXIT_VMPTRST = 22, // Guest executed VMPTRST instruction
+        VMX_EXIT_VMREAD = 23, // Guest executed VMREAD instruction
+        VMX_EXIT_VMRESUME = 24, // Guest executed VMRESUME instruction
+        VMX_EXIT_VMWRITE = 25, // Guest executed VMWRITE instruction
+        VMX_EXIT_VMXOFF = 26, // Guest executed VMXON instruction
+        VMX_EXIT_VMXON = 27, // Guest executed VMXOFF instruction
         VMX_EXIT_CR_ACCESS = 28, // Guest accessed a control register
         VMX_EXIT_DR_ACCESS = 29, // Guest attempted access to debug register
         VMX_EXIT_IO = 30, // Guest attempted I/O
@@ -856,6 +856,7 @@ extern "C" {
         VMX_EXIT_MACHINE_CHECK = 41,
         VMX_EXIT_TPR_BELOW_THRESHOLD = 43,
         VMX_EXIT_APIC_ACCESS = 44,
+        VMX_EXIT_VIRTUALIZED_EOI = 45,
         VMX_EXIT_GDT_IDT_ACCESS = 46,
         VMX_EXIT_LDT_TR_ACCESS = 47,
         VMX_EXIT_EPT_VIOLATION = 48,
@@ -865,15 +866,19 @@ extern "C" {
         VMX_EXIT_VMX_TIMER_EXIT = 52,
         VMX_EXIT_INVVPID = 53,
         VMX_EXIT_WBINVD = 54,
-        VMX_EXIT_XSETBV = 55,
+        VMX_EXIT_XSETBV = 55, // Guest executed XSETBV instruction
         VMX_EXIT_APIC_WRITE = 56,
         VMX_EXIT_RDRAND = 57,
         VMX_EXIT_INVPCID = 58,
         VMX_EXIT_VMFUNC = 59,
         VMX_EXIT_ENCLS = 60,
         VMX_EXIT_RDSEED = 61,
+        VMX_EXIT_PML_FULL = 62,
         VMX_EXIT_XSAVES = 63,
-        VMX_EXIT_XRSTORS = 64
+        VMX_EXIT_XRSTORS = 64,
+        VMX_EXIT_SPP_RELATED = 66,
+        VMX_EXIT_UMWAIT = 67,
+        VMX_EXIT_TPAUSE = 68
     };
 
     enum {
@@ -1092,7 +1097,7 @@ extern "C" {
 #define ENTRY_CONTROL_LOAD_EFER                0x00008000
 #define ENTRY_CONTROLS_DEFINED                 0x0000ee04
 
-    // Intel SDM Vol. 3C: 30.2 Conventions
+ // Intel SDM Vol. 3C: 30.2 Conventions
     typedef enum VMX_RESULT {
         /* VMsucceed
         * Operation succeeded (OSZPAC flags are 0) */
@@ -1407,17 +1412,17 @@ extern "C" {
 
     typedef struct _VMX_INFO {
         union {
-            ULONG64 BaseInfo;
+            u64 BaseInfo;
 
             struct {
-                ULONG Identifier;
+                u32 Identifier;
 
                 struct {
-                    ULONG NumberOfBytes : 16;
-                    ULONG Limit : 1;
-                    ULONG DualMonitor : 1;
-                    ULONG Type : 4;
-                    ULONG NOTHING : 10;
+                    u32 NumberOfBytes : 16;
+                    u32 Limit : 1;
+                    u32 DualMonitor : 1;
+                    u32 Type : 4;
+                    u32 NOTHING : 10;
                 };
             };
         };
@@ -1459,138 +1464,138 @@ extern "C" {
 #define ENCODE_SHIFT 13
 
     typedef struct _VMX_VMCS {
-        ULONG Identifier;
-        ULONG Abort;
-        UCHAR Data[PAGE_SIZE - 8];
+        u32 Identifier;
+        u32 Abort;
+        u8 Data[PAGE_SIZE - 8];
     } VMX_VMCS, *PVMX_VMCS;
 
     typedef struct _INVEPT_DESCRIPTOR {
-        ULONG64 EptPointer;
-        ULONG64 Reserved;
+        u64 EptPointer;
+        u64 Reserved;
     }INVEPT_DESCRIPTOR, *PINVEPT_DESCRIPTOR;
 
     VMX_RESULT
         NTAPI
         __ops_invept(
-            __in ULONG Type,
+            __in u32 Type,
             __in PINVEPT_DESCRIPTOR Descriptor
         );
 
     VMX_RESULT
         NTAPI
         __vmx_on(
-            __in ULONG64 * VmsSupportPhysicalAddress
+            __in u64 * VmsSupportPhysicalAddress
         );
 
     VMX_RESULT
         NTAPI
         __vmx_off(
-            VOID
+            void
         );
 
     VMX_RESULT
         NTAPI
         __vmx_vmclear(
-            __in ULONG64 * VmcsPhysicalAddress
+            __in u64 * VmcsPhysicalAddress
         );
 
     VMX_RESULT
         NTAPI
         __vmx_vmptrld(
-            __in ULONG64 * VmcsPhysicalAddress
+            __in u64 * VmcsPhysicalAddress
         );
 
     VMX_RESULT
         NTAPI
         __vmx_vmptrst(
-            __in ULONG64 * VmcsPhysicalAddress
+            __in u64 * VmcsPhysicalAddress
         );
 
     VMX_RESULT
         NTAPI
         __vmx_vmread(
-            __in SIZE_T Field,
-            __out SIZE_T * Value
+            __in u Field,
+            __out u * Value
         );
 
     VMX_RESULT
         NTAPI
         __vmx_vmwrite(
-            __in SIZE_T Field,
-            __in SIZE_T Value
+            __in u Field,
+            __in u Value
         );
 
     VMX_RESULT
         NTAPI
         __vmx_vmlaunch(
-            VOID
+            void
         );
 
     VMX_RESULT
         NTAPI
         __vmx_vmresume(
-            VOID
+            void
         );
 
     VMX_RESULT
         NTAPI
         __vmx_vmread_common(
-            __in SIZE_T Field,
-            __out ULONG64 * Value
+            __in u Field,
+            __out u64 * Value
         );
 
     VMX_RESULT
         NTAPI
         __vmx_vmwrite_common(
-            __in SIZE_T Field,
-            __in ULONG64 Value
+            __in u Field,
+            __in u64 Value
         );
 
     typedef struct _SEGMENT_DESCRIPTOR {
-        USHORT Selector;
+        u16 Selector;
 
         union {
             struct {
-                ULONG LimitLow : 16;
-                ULONG LimitHigh : 4;
+                u32 LimitLow : 16;
+                u32 LimitHigh : 4;
             };
 
-            ULONG Limit;
+            u32 Limit;
         };
 
         union {
             struct {
-                ULONG64 BaseLow : 16;
-                ULONG64 BaseMiddle : 8;
-                ULONG64 BaseHigh : 8;
+                u64 BaseLow : 16;
+                u64 BaseMiddle : 8;
+                u64 BaseHigh : 8;
 #ifdef _WIN64
-                ULONG64 BaseUpper : 32;
+                u64 BaseUpper : 32;
 #endif // _WIN64
             };
 
-            ULONG_PTR Base;
+            u Base;
         };
 
         union {
             struct {
-                ULONG Type : 4; //Segment type
-                ULONG S : 1; //Descriptor type (0 = system; 1 = code or data)
-                ULONG DPL : 2; //Descriptor privilege level
-                ULONG P : 1; //Segment present
-                ULONG NOTHING : 4; //Reserved
-                ULONG AVL : 1; //Available for use by system software
-                ULONG L : 1; //64-bit mode active (for CS only)
-                ULONG DB : 1; //Default operation size (0 = 16-bit segment; 1 = 32-bit segment)
-                ULONG G : 1; //Granularity
-                ULONG Unusable : 1; //Segment unusable (0 = usable; 1 = unusable)
-                ULONG NOTHING : 15; //Reserved
+                u32 Type : 4; //Segment type
+                u32 S : 1; //Descriptor type (0 = system; 1 = code or data)
+                u32 DPL : 2; //Descriptor privilege level
+                u32 P : 1; //Segment present
+                u32 NOTHING : 4; //Reserved
+                u32 AVL : 1; //Available for use by system software
+                u32 L : 1; //64-bit mode active (for CS only)
+                u32 DB : 1; //Default operation size (0 = 16-bit segment; 1 = 32-bit segment)
+                u32 G : 1; //Granularity
+                u32 Unusable : 1; //Segment unusable (0 = usable; 1 = unusable)
+                u32 NOTHING : 15; //Reserved
             };
 
-            ULONG AccessRights;
+            u32 AccessRights;
         };
     } SEGMENT_DESCRIPTOR, *PSEGMENT_DESCRIPTOR;
 
-    VOID
+    void
         NTAPI
         __vmx_prepare_segment(
             __in PKDESCRIPTOR Descriptor,
@@ -1611,200 +1616,200 @@ extern "C" {
 #define NO_ERROR_CODE ~0U
 
     typedef union _ENTRY_INTERRUPTION {
-        ULONG64 Information;
+        u64 Information;
 
         struct {
-            ULONG64 Vector : 8;
-            ULONG64 Type : 3;
-            ULONG64 DeliverErrorCode : 1;
-            ULONG64 NOTHING : 19;
-            ULONG64 Valid : 1;
+            u64 Vector : 8;
+            u64 Type : 3;
+            u64 DeliverErrorCode : 1;
+            u64 NOTHING : 19;
+            u64 Valid : 1;
         };
     }ENTRY_INTERRUPTION, *PENTRY_INTERRUPTION;
 
     typedef union _REASON {
         struct {
-            ULONG64 BasicReason : 16;
-            ULONG64 NOTHING : 11;
+            u64 BasicReason : 16;
+            u64 NOTHING : 11;
 
             // A VM exit saves this bit as 1 to indicate that the VM exit was incident to enclave mode.
-            ULONG64 EnclaveMode : 1;
-            ULONG64 PendingMTF : 1;
-            ULONG64 ExitRoot : 1; // VM exit from VMX root operation
-            ULONG64 NOTHING : 1;
-            ULONG64 EnterFail : 1; // 0 = true VM exit; 1 = VM-entry failure
+            u64 EnclaveMode : 1;
+            u64 PendingMTF : 1;
+            u64 ExitRoot : 1; // VM exit from VMX root operation
+            u64 NOTHING : 1;
+            u64 EnterFail : 1; // 0 = true VM exit; 1 = VM-entry failure
         };
     }REASON, *PREASON;
 
     typedef union _EXIT_INTERRUPTION {
-        ULONG64 Information;
+        u64 Information;
 
         struct {
-            ULONG64 Vector : 8;
-            ULONG64 Type : 3;
-            ULONG64 ErrorCode : 1;
-            ULONG64 NmiUnmasking : 1;
-            ULONG64 NOTHING : 18;
-            ULONG64 Valid : 1;
+            u64 Vector : 8;
+            u64 Type : 3;
+            u64 ErrorCode : 1;
+            u64 NmiUnmasking : 1;
+            u64 NOTHING : 18;
+            u64 Valid : 1;
         };
     }EXIT_INTERRUPTION, *PEXIT_INTERRUPTION;
 
     typedef union _IDT_VECTORING {
-        ULONG64 Information;
+        u64 Information;
 
         struct {
-            ULONG64 Vector : 8;
-            ULONG64 Type : 3;
-            ULONG64 ErrorCode : 1;
-            ULONG64 Undefined : 1;
-            ULONG64 NOTHING : 18;
-            ULONG64 Valid : 1;
+            u64 Vector : 8;
+            u64 Type : 3;
+            u64 ErrorCode : 1;
+            u64 Undefined : 1;
+            u64 NOTHING : 18;
+            u64 Valid : 1;
         };
     }IDT_VECTORING, *PIDT_VECTORING;
 
     typedef union _INSTRUCTION {
-        ULONG64 Information;
+        u64 Information;
 
         struct {
             union {
                 struct {
-                    ULONG64 Scaling : 2;
+                    u64 Scaling : 2;
 
                     union {
                         struct {
-                            ULONG64 NOTHING : 1;
-                            ULONG64 Reg1 : 4;
+                            u64 NOTHING : 1;
+                            u64 Reg1 : 4;
                         };
 
-                        ULONG64 DestReg : 4;
+                        u64 DestReg : 4;
                     };
                 };
 
-                ULONG64 NOTHING : 7;
+                u64 NOTHING : 7;
             };
 
-            ULONG64 AddrSize : 3;
+            u64 AddrSize : 3;
 
             union {
                 struct {
-                    ULONG64 MemOrReg : 1;
-                    ULONG64 OpSize : 2;
+                    u64 MemOrReg : 1;
+                    u64 OpSize : 2;
                 };
 
-                ULONG64 NOTHING : 5;
+                u64 NOTHING : 5;
             };
 
-            ULONG64 Segment : 3;
+            u64 Segment : 3;
 
             union {
                 struct {
-                    ULONG64 IndexReg : 4;
-                    ULONG64 IndexRegInvalid : 1;
-                    ULONG64 BaseReg : 4;
-                    ULONG64 BaseRegInvalid : 1;
+                    u64 IndexReg : 4;
+                    u64 IndexRegInvalid : 1;
+                    u64 BaseReg : 4;
+                    u64 BaseRegInvalid : 1;
 
                     union {
                         struct {
-                            ULONG64 InstructionIdentity : 2;
-                            ULONG64 NOTHING : 2;
+                            u64 InstructionIdentity : 2;
+                            u64 NOTHING : 2;
                         };
 
-                        ULONG64 Reg2 : 4;
+                        u64 Reg2 : 4;
                     };
                 };
 
-                ULONG64 NOTHING : 14;
+                u64 NOTHING : 14;
             };
         };
     }INSTRUCTION, *PINSTRUCTION;
 
     typedef union _QUALIFICATION {
-        ULONG64 Address;
+        u64 Address;
 
         struct {
-            ULONG64 Size : 3;
-            ULONG64 Direction : 1;
-            ULONG64 String : 1;
-            ULONG64 Rep : 1;
-            ULONG64 Encoding : 1;
-            ULONG64 NOTHING : 9;
-            ULONG64 Port : 16;
+            u64 Size : 3;
+            u64 Direction : 1;
+            u64 String : 1;
+            u64 Rep : 1;
+            u64 Encoding : 1;
+            u64 NOTHING : 9;
+            u64 Port : 16;
         } IO;
 
         struct {
-            ULONG64 Number : 4;
-            ULONG64 Type : 2;
-            ULONG64 LMSW : 2;
-            ULONG64 GpReg : 4;
-            ULONG64 NOTHING : 4;
-            ULONG64 LMSWSource : 16;
+            u64 Number : 4;
+            u64 Type : 2;
+            u64 LMSW : 2;
+            u64 GpReg : 4;
+            u64 NOTHING : 4;
+            u64 LMSWSource : 16;
         } CR;
 
         struct {
-            ULONG64 Number : 3;
-            ULONG64 NOTHING : 1;
-            ULONG64 Direction : 1;
-            ULONG64 NOTHING : 3;
-            ULONG64 GpReg : 4;
-            ULONG64 NOTHING : 20;
+            u64 Number : 3;
+            u64 NOTHING : 1;
+            u64 Direction : 1;
+            u64 NOTHING : 3;
+            u64 GpReg : 4;
+            u64 NOTHING : 20;
         } DR;
 
         struct {
-            ULONG64 Selector : 16;
-            ULONG64 NOTHING : 14;
-            ULONG64 Source : 2;
+            u64 Selector : 16;
+            u64 NOTHING : 14;
+            u64 Source : 2;
         }TS;
 
         struct {
-            ULONG64 Offset : 12;
-            ULONG64 Access : 3;
+            u64 Offset : 12;
+            u64 Access : 3;
         } APIC;
 
         struct {
-            ULONG64 Vector;
+            u64 Vector;
         } VAPIC_EOI;
 
         struct {
-            ULONG64 Read : 1;
-            ULONG64 Write : 1;
-            ULONG64 Execute : 1;
-            ULONG64 Readable : 1;
-            ULONG64 Writeable : 1;
-            ULONG64 Executable : 1;
-            ULONG64 NOTHING : 1;
-            ULONG64 Gla1 : 1;
-            ULONG64 Gla2 : 1;
-            ULONG64 NOTHING : 3;  /* bits 11:9 */
-            ULONG64 NmiBlock : 1;
-            ULONG64 NOTHING : 19;
-            ULONG64 NOTHING : 32;
+            u64 Read : 1;
+            u64 Write : 1;
+            u64 Execute : 1;
+            u64 Readable : 1;
+            u64 Writeable : 1;
+            u64 Executable : 1;
+            u64 NOTHING : 1;
+            u64 Gla1 : 1;
+            u64 Gla2 : 1;
+            u64 NOTHING : 3;  /* bits 11:9 */
+            u64 NmiBlock : 1;
+            u64 NOTHING : 19;
+            u64 NOTHING : 32;
         } EPT;
     }QUALIFICATION, *PQUALIFICATION;
 
     typedef struct _GUEST_STATE {
-        ULONG64 GuestRip;
-        ULONG64 GuestRsp;
-        ULONG64 GuestRFlags;
+        u64 GuestRip;
+        u64 GuestRsp;
+        u64 GuestRFlags;
         ENTRY_INTERRUPTION EntryInterruption;
         REASON Reason;
         EXIT_INTERRUPTION ExitInterruption;
         IDT_VECTORING IdtVectoring;
         INSTRUCTION Instruction;
-        ULONG64 InstructionLength;
+        u64 InstructionLength;
         QUALIFICATION Qualification;
-        BOOLEAN Injected;
+        b Injected;
     } GUEST_STATE, *PGUEST_STATE;
 
     typedef struct _CCB {
         DECLSPEC_ALIGN(PAGE_SIZE) struct {
-            UCHAR KernelStack[KERNEL_LARGE_STACK_SIZE - sizeof(REGISTERS_FRAME)];
+            u8 KernelStack[KERNEL_LARGE_STACK_SIZE - sizeof(REGISTERS_FRAME)];
             REGISTERS_FRAME Registers;
         };
 
         DECLSPEC_ALIGN(PAGE_SIZE) struct {
             VMX_VMCS VmsSupport;
             VMX_VMCS Vmcs;
-            UCHAR Bitmap[PAGE_SIZE];
+            u8 Bitmap[PAGE_SIZE];
         }Region;
 
         ULARGE_INTEGER ExceptionBitmap;
@@ -1820,50 +1825,46 @@ extern "C" {
     }CCB, *PCCB;
 
     typedef
-        VOID
+        void
         (NTAPI * PEXIT_HANDLER)(
             __inout PCCB Block
             );
 
-    ULONG
+    u32
         NTAPI
         __ops_segment_limit(
-            __in ULONG Selector
+            __in u32 Selector
         );
 
-    ULONG
+    u32
         NTAPI
         __ops_segment_ar(
-            __in ULONG Selector
+            __in u32 Selector
         );
 
-    VOID
+    void
         NTAPI
         __vmx_vmentry(
-            VOID
+            void
         );
 
-    NTSTATUS
+    status
         NTAPI
         __vmx_start(
             __in PCCB Block
         );
 
-    NTSTATUS
+    status
         NTAPI
         __vmx_entry(
             __in PREGISTERS_FRAME Registers
         );
 
-    VOID
+    void
         NTAPI
         VmxStartAllProcessors(
-            __in PKEVENT Notify
+            __in PCCB * Block
         );
-
-#ifdef __cplusplus
-}
-#endif	/* __cplusplus */
 
 #ifdef __cplusplus
 }

@@ -21,8 +21,8 @@
 
 #include "Daat.h"
 
-#include "handler.h"
-#include "vmx.h"
+#include "Vmxhandler.h"
+#include "Vmx.h"
 
 VOID
 NTAPI

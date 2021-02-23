@@ -51,8 +51,8 @@ CCARCHOBJS =
 
 CCOBJS = \
     $(OBJD)\$(PROJ).obj \
-    $(OBJD)\handler.obj \
-    $(OBJD)\vmx.obj
+    $(OBJD)\VmxHandler.obj \
+    $(OBJD)\Vmx.obj
     
 RCOBJS = $(OBJD)\$(PROJ).res
 
@@ -127,8 +127,6 @@ BUILDLIBS = hal.lib ntoskrnl.lib bufferoverflowk.lib \
 !else if "$(ARCTARG)" == "AMD64"
     gshandler.obj gshandlerseh.obj \
 !endif
-    disasm.obj \
-    syscall.lib
 
 LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup
 LINK = link.exe /nologo
@@ -137,6 +135,8 @@ LINKPROJNAMES = /out:$(PROJTARG).sys /map:$(PROJTARG).map /pdb:$(PROJTARG).pdb
 
 $(PROJTARG).sys: $(PROJOBJS)
     @$(LINK) $(LINKFLAGS) $(PROJLOPTS) $(LINKPROJNAMES) $** $(HOTPATCH) $(LINKLIBPATH) $(BUILDLIBS)
+    @if not exist $(BIND)\Start.cmd copy /Y $(SLND)\Start.cmd $(BIND)\Start.cmd
+    @if not exist $(BIND)\Stop.cmd copy /Y $(SLND)\Stop.cmd $(BIND)\Stop.cmd
 
 # assembly files
 {$(ARCTARG)\}.asm{$(OBJD)\}.obj:

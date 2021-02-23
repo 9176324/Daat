@@ -5,13 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Include", "Include", "{0BB17AFE-97FB-442A-B80B-027C1B710A97}"
 	ProjectSection(SolutionItems) = preProject
-		Include\CEPluginSDK.h = Include\CEPluginSDK.h
 		Include\defs.h = Include\defs.h
 		Include\devicedefs.h = Include\devicedefs.h
-		Include\log.h = Include\log.h
-		Include\unicode.inc = Include\unicode.inc
-		Include\VMProtectDDK.h = Include\VMProtectDDK.h
-		Include\VMProtectSDK.h = Include\VMProtectSDK.h
 		Include\WARNING.h = Include\WARNING.h
 		Include\wow64.h = Include\wow64.h
 	EndProjectSection
@@ -28,10 +23,6 @@ Global
 		{923B700A-333B-4502-8CE0-1B74E2305FF0}.Optimized|x64.Build.0 = Optimized|x64
 		{923B700A-333B-4502-8CE0-1B74E2305FF0}.Optimized|x86.ActiveCfg = Optimized|Win32
 		{923B700A-333B-4502-8CE0-1B74E2305FF0}.Optimized|x86.Build.0 = Optimized|Win32
-		{BA9716C2-ECBA-4FE1-B3E8-0D918E15C534}.Optimized|x64.ActiveCfg = Optimized|x64
-		{BA9716C2-ECBA-4FE1-B3E8-0D918E15C534}.Optimized|x64.Build.0 = Optimized|x64
-		{BA9716C2-ECBA-4FE1-B3E8-0D918E15C534}.Optimized|x86.ActiveCfg = Optimized|Win32
-		{BA9716C2-ECBA-4FE1-B3E8-0D918E15C534}.Optimized|x86.Build.0 = Optimized|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

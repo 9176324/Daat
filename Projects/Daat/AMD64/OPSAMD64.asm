@@ -755,6 +755,8 @@ __ops_writedr_ret :
 
         call __vmx_entry
 
+        int 3
+
         mov rax, -1
 
 resume :
