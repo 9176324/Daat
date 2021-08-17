@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Include", "Include", "{0BB1
 	ProjectSection(SolutionItems) = preProject
 		Include\defs.h = Include\defs.h
 		Include\devicedefs.h = Include\devicedefs.h
+		Include\guarddefs.h = Include\guarddefs.h
 		Include\WARNING.h = Include\WARNING.h
 		Include\wow64.h = Include\wow64.h
 	EndProjectSection

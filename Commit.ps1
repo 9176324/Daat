@@ -17,6 +17,5 @@
 #
 
 git add *
-git commit -m (Get-Date -Format "dddd MM/dd/yyyy HH:mm:ss")
-git push -u GitHub master
+git commit -m (Get-Date -Format "dddd MM/dd/yyyy HH:mm:ss:fff")
 pause

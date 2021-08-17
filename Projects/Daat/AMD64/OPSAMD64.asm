@@ -168,6 +168,20 @@ REGISTERS_FRAME_LENGTH EQU 00280h
         
 ; ULONG
 ;     NTAPI
+;     __ops_lgdt(
+;         __in PUSHORT Limit
+;     );
+
+        LEAF_ENTRY __ops_lgdt, _TEXT$00
+        
+        lgdt fword ptr [rcx] ; &Descriptor->Limit
+        
+        ret
+        
+        LEAF_END __ops_lgdt, _TEXT$00
+        
+; ULONG
+;     NTAPI
 ;     __ops_sidt(
 ;         __in PUSHORT Limit
 ;     );
@@ -179,6 +193,20 @@ REGISTERS_FRAME_LENGTH EQU 00280h
         ret
         
         LEAF_END __ops_sidt, _TEXT$00
+        
+; ULONG
+;     NTAPI
+;     __ops_lidt(
+;         __in PUSHORT Limit
+;     );
+
+        LEAF_ENTRY __ops_lidt, _TEXT$00
+        
+        lidt fword ptr [rcx] ; &Descriptor->Limit
+        
+        ret
+        
+        LEAF_END __ops_lidt, _TEXT$00
         
 ; ULONG
 ;     NTAPI

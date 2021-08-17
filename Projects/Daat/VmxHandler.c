@@ -22,13 +22,13 @@
 
 #include "Vmx.h"
 
+#ifdef _WIN64
 void
 NTAPI
-__monitor_set_dr7(
+__monitor_patch_guard(
     __inout PCCB Block
 )
 {
-#ifdef _WIN64
     u16ptr GuestRip = NULL;
 
     // patchguard code clear dr7
@@ -39,19 +39,28 @@ __monitor_set_dr7(
 
     if (0x10f == *GuestRip) {
         // restore idt
+
         __vmx_vmwrite_common(GUEST_IDTR_BASE, (u64)Block->Registers.Idtr.Base);
         __vmx_vmwrite_common(GUEST_IDTR_LIMIT, Block->Registers.Idtr.Limit);
-        __vmx_vmwrite_common(GUEST_DR7, DR7_SETBITS);
+
+        __inject_exception(Block, VECTOR_BP, NO_ERROR_CODE, EXCEPTION);
 
         // use hardware breakpoint
+
         // __ops_writedr(0, Block->GuestState.GuestRip + Block->GuestState.InstructionLength);
         // __ops_writedr(6, DR6_SETBITS | (1 << 0));
         // __vmx_vmwrite_common(GUEST_DR7, DR7_SETBITS | (1 << 0));
 
-        __inject_exception(Block, VECTOR_BP, NO_ERROR_CODE, EXCEPTION);
+        vDbgPrint(
+            "[DAAT] CmpAppendDllSection caller < %p >\n",
+            __rduptr(Block->Registers.Rbp + 0x5f));
+
+        vDbgPrint(
+            "[DAAT] Exception caller < %p >\n",
+            __rduptr(Block->Registers.Rbp + 0x5f + 0x30));
     }
-#endif // _WIN64
 }
+#endif // _WIN64
 
 void
 NTAPI
@@ -344,7 +353,9 @@ __vm_dr_access(
             else {
                 __vmx_vmwrite_common(GUEST_DR7, Block->Registers.Dr7);
 
-                __monitor_set_dr7(Block);
+#ifdef _WIN64                                 
+                __monitor_patch_guard(Block);
+#endif // _WIN64
             }
         }
     }
@@ -614,6 +625,9 @@ __vm_exit_dispatch(
     CurrentBlock->GuestState.GuestRip += CurrentBlock->GuestState.InstructionLength;
 
     __vmx_vmwrite_common(GUEST_RIP, CurrentBlock->GuestState.GuestRip);
+
+    // __vmx_vmwrite_common(GUEST_GDTR_BASE, (u64)CurrentBlock->Registers.Gdtr.Base);
+    // __vmx_vmwrite_common(GUEST_GDTR_LIMIT, CurrentBlock->Registers.Gdtr.Limit);
     // __vmx_vmwrite_common(GUEST_IDTR_BASE, (u64)CurrentBlock->Registers.Idtr.Base);
     // __vmx_vmwrite_common(GUEST_IDTR_LIMIT, CurrentBlock->Registers.Idtr.Limit);
 

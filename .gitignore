@@ -2,17 +2,16 @@
 # Compiled binaries.
 #
 Build/**
-Debug/**
 
 #
 # Visual Studio files.
 #
 .vs/**
-*.BAT
-*.CMD
-*.VMP
 *.VC.db
 *.VC.opendb
+*.sdf
+*v12..suo
+*.suo
 
 #
 # VS Code files.

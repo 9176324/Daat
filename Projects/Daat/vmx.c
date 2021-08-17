@@ -20,6 +20,8 @@
 
 #include "Vmx.h"
 
+#include "VmxHandler.h"      
+
 VMX_RESULT
 NTAPI
 __vmx_vmwrite_common(
@@ -126,9 +128,9 @@ __vmx_prepare_segment(
     __out PSEGMENT_DESCRIPTOR SegmentDescriptor
 )
 {
-#ifndef _WIN64
+#ifndef _WIN64                     
     PKGDTENTRY GdtEntry = NULL;
-#else
+#else                               
     PKGDTENTRY64 GdtEntry = NULL;
 #endif // !_WIN64
 

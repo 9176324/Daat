@@ -132,6 +132,22 @@ REGISTERS_FRAME_LENGTH EQU 00080h
     
 ; ULONG
 ;     NTAPI
+;     __ops_lgdt(
+;         __in PUSHORT Limit
+;     );
+
+    cPublicProc ___ops_lgdt, 1
+    
+        mov ecx, [esp + 4]
+        
+        lgdt fword ptr [ecx] ; &Descriptor->Limit
+        
+        stdRET ___ops_lgdt
+
+    stdENDP ___ops_lgdt
+    
+; ULONG
+;     NTAPI
 ;     __ops_sidt(
 ;         __in PUSHORT Limit
 ;     );
@@ -145,6 +161,22 @@ REGISTERS_FRAME_LENGTH EQU 00080h
         stdRET ___ops_sidt
 
     stdENDP ___ops_sidt
+    
+; ULONG
+;     NTAPI
+;     __ops_lidt(
+;         __in PUSHORT Limit
+;     );
+
+    cPublicProc ___ops_lidt, 1
+    
+        mov ecx, [esp + 4]
+        
+        lidt fword ptr [ecx] ; &Descriptor->Limit
+        
+        stdRET ___ops_lidt
+
+    stdENDP ___ops_lidt
     
 ; ULONG
 ;     NTAPI
