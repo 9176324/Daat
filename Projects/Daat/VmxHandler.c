@@ -30,6 +30,7 @@ __monitor_patch_guard(
 )
 {
     u16ptr GuestRip = NULL;
+    KDESCRIPTOR Idtr = { 0 };
 
     // patchguard code clear dr7
 
@@ -38,18 +39,26 @@ __monitor_patch_guard(
             Block->GuestState.InstructionLength);
 
     if (0x10f == *GuestRip) {
+        __vmx_vmread_common(GUEST_IDTR_BASE, &Idtr.Base);
+        __vmx_vmread_common(GUEST_IDTR_LIMIT, &Idtr.Limit);
+
         // restore idt
 
         __vmx_vmwrite_common(GUEST_IDTR_BASE, (u64)Block->Registers.Idtr.Base);
         __vmx_vmwrite_common(GUEST_IDTR_LIMIT, Block->Registers.Idtr.Limit);
-
+        
         __inject_exception(Block, VECTOR_BP, NO_ERROR_CODE, EXCEPTION);
 
-        // use hardware breakpoint
+        // use hardware breakpoint set dr0
 
         // __ops_writedr(0, Block->GuestState.GuestRip + Block->GuestState.InstructionLength);
         // __ops_writedr(6, DR6_SETBITS | (1 << 0));
         // __vmx_vmwrite_common(GUEST_DR7, DR7_SETBITS | (1 << 0));
+
+        vDbgPrint(
+            "[DAAT] IDTR < %p : %04x >\n",
+            Idtr.Base,
+            Idtr.Limit);
 
         vDbgPrint(
             "[DAAT] CmpAppendDllSection caller < %p >\n",
@@ -427,7 +436,7 @@ __vm_msr_read(
     Block->Registers.Rax = Msr.LowPart;
     Block->Registers.Rdx = Msr.HighPart;
 #endif // !_WIN64
-}
+    }
 
 void
 NTAPI
