@@ -29,8 +29,6 @@ __monitor_patch_guard(
     __inout PCCB Block
 )
 {
-    KDESCRIPTOR Idtr = { 0 };
-
     // patchguard code clear dr7
 
     if (0x10f ==
