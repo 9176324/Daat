@@ -680,8 +680,6 @@ __vmx_entry(
         CurrentBlock->VmxInfo.Entry.HighPart,
         CurrentBlock->VmxInfo.Entry.LowPart);
 
-    __debugbreak();
-
     Result = __vmx_vmlaunch();
 
     if (VMX_SUCCEED != Result) {
