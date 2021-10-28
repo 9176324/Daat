@@ -714,99 +714,6 @@ extern "C" {
     C_ASSERT(sizeof(REGISTERS_FRAME) == 0x280);
 #endif // !_WIN64
 
-    void
-        NTAPI
-        ReadCpuFeature(
-            __in PCPU_FEATURE Feature
-        );
-
-    void
-        NTAPI
-        CaptureRegisters(
-            __out PREGISTERS_FRAME Registers
-        );
-
-    void
-        NTAPI
-        RestoreRegisters(
-            __in PREGISTERS_FRAME Registers
-        );
-
-    u32
-        NTAPI
-        __ops_sldt(
-            __in u16ptr Selector
-        );
-
-    u32
-        NTAPI
-        __ops_str(
-            __in u16ptr Selector
-        );
-
-    u32
-        NTAPI
-        __ops_sgdt(
-            __in u16ptr Limit
-        );
-
-    u32
-        NTAPI
-        __ops_lgdt(
-            __in u16ptr Limit
-        );
-
-    u32
-        NTAPI
-        __ops_sidt(
-            __in u16ptr Limit
-        );
-
-    u32
-        NTAPI
-        __ops_lidt(
-            __in u16ptr Limit
-        );
-
-    u64
-        NTAPI
-        __ops_readmsr(
-            __in u32 Register
-        );
-
-    void
-        NTAPI
-        __ops_writemsr(
-            __in u32 Register,
-            __in u64 Value
-        );
-
-    u
-        NTAPI
-        __ops_readcr(
-            __in u32 Register
-        );
-
-    void
-        NTAPI
-        __ops_writecr(
-            __in u32 Register,
-            __in u Value
-        );
-
-    u
-        NTAPI
-        __ops_readdr(
-            __in u32 Register
-        );
-
-    void
-        NTAPI
-        __ops_writedr(
-            __in u32 Register,
-            __in u Value
-        );
-
 #define VMCS_NONE 0xFFFFFFFFFFFFFFFF
 
     // Size of VMCS structure
@@ -1098,7 +1005,7 @@ extern "C" {
 #define ENTRY_CONTROLS_DEFINED                 0x0000ee04
 
  // Intel SDM Vol. 3C: 30.2 Conventions
-    typedef enum VMX_RESULT {
+    typedef enum _VMX_RESULT {
         /* VMsucceed
         * Operation succeeded (OSZPAC flags are 0) */
         VMX_SUCCEED = 0,
@@ -1410,7 +1317,7 @@ extern "C" {
 
 #define IA32_VMX_MISC_UG_AVAILABLE (0x0000000000000020)
 
-    typedef struct _VMX_INFO {
+    typedef struct _VMX_CONTROLS {
         union {
             u64 BaseInfo;
 
@@ -1427,6 +1334,8 @@ extern "C" {
             };
         };
 
+        u64 EptVpidCapabilities;
+
         ULARGE_INTEGER Pin;
         ULARGE_INTEGER PinFixed;
 
@@ -1441,17 +1350,7 @@ extern "C" {
 
         ULARGE_INTEGER Entry;
         ULARGE_INTEGER EntryFixed;
-
-        ULARGE_INTEGER Cr0;
-        ULARGE_INTEGER Cr0Fixed;
-        ULARGE_INTEGER Cr0Mask;
-        ULARGE_INTEGER Cr0ReadShadow;
-
-        ULARGE_INTEGER Cr4;
-        ULARGE_INTEGER Cr4Fixed;
-        ULARGE_INTEGER Cr4Mask;
-        ULARGE_INTEGER Cr4ReadShadow;
-    }VMX_INFO, *PVMX_INFO;
+    }VMX_CONTROLS, *PVMX_CONTROLS;
 
     enum {
         ENCODE_16,
@@ -1463,95 +1362,7 @@ extern "C" {
 #define ENCODE_MASK 3
 #define ENCODE_SHIFT 13
 
-    typedef struct _VMX_VMCS {
-        u32 Identifier;
-        u32 Abort;
-        u8 Data[PAGE_SIZE - 8];
-    } VMX_VMCS, *PVMX_VMCS;
-
-    typedef struct _INVEPT_DESCRIPTOR {
-        u64 EptPointer;
-        u64 Reserved;
-    }INVEPT_DESCRIPTOR, *PINVEPT_DESCRIPTOR;
-
-    VMX_RESULT
-        NTAPI
-        __ops_invept(
-            __in u32 Type,
-            __in PINVEPT_DESCRIPTOR Descriptor
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_on(
-            __in u64 * VmsSupportPhysicalAddress
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_off(
-            void
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_vmclear(
-            __in u64 * VmcsPhysicalAddress
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_vmptrld(
-            __in u64 * VmcsPhysicalAddress
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_vmptrst(
-            __in u64 * VmcsPhysicalAddress
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_vmread(
-            __in u Field,
-            __out u * Value
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_vmwrite(
-            __in u Field,
-            __in u Value
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_vmlaunch(
-            void
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_vmresume(
-            void
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_vmread_common(
-            __in u Field,
-            __out u64 * Value
-        );
-
-    VMX_RESULT
-        NTAPI
-        __vmx_vmwrite_common(
-            __in u Field,
-            __in u64 Value
-        );
-
-    typedef struct _SEGMENT_DESCRIPTOR {
+    typedef struct _VMX_GDTENTRY {
         u16 Selector;
 
         union {
@@ -1593,15 +1404,7 @@ extern "C" {
 
             u32 AccessRights;
         };
-    } SEGMENT_DESCRIPTOR, *PSEGMENT_DESCRIPTOR;
-
-    void
-        NTAPI
-        __vmx_prepare_segment(
-            __in PKDESCRIPTOR Descriptor,
-            __in UINT16 Selector,
-            __out PSEGMENT_DESCRIPTOR SegmentDescriptor
-        );
+    } VMX_GDTENTRY, *PVMX_GDTENTRY;
 
     enum {
         INTERRUPT = 0,
@@ -1642,7 +1445,7 @@ extern "C" {
     }REASON, *PREASON;
 
     typedef union _EXIT_INTERRUPTION {
-        u64 Information;
+        u64 Alignment;
 
         struct {
             u64 Vector : 8;
@@ -1655,7 +1458,7 @@ extern "C" {
     }EXIT_INTERRUPTION, *PEXIT_INTERRUPTION;
 
     typedef union _IDT_VECTORING {
-        u64 Information;
+        u64 Alignment;
 
         struct {
             u64 Vector : 8;
@@ -1668,7 +1471,7 @@ extern "C" {
     }IDT_VECTORING, *PIDT_VECTORING;
 
     typedef union _INSTRUCTION {
-        u64 Information;
+        u64 Alignment;
 
         struct {
             union {
@@ -1724,7 +1527,7 @@ extern "C" {
     }INSTRUCTION, *PINSTRUCTION;
 
     typedef union _QUALIFICATION {
-        u64 Address;
+        u64 Alignment;
 
         struct {
             u64 Size : 3;
@@ -1790,68 +1593,410 @@ extern "C" {
         u64 GuestRip;
         u64 GuestRsp;
         u64 GuestRFlags;
-        ENTRY_INTERRUPTION EntryInterruption;
+        ENTRY_INTERRUPTION Entry;
         REASON Reason;
-        EXIT_INTERRUPTION ExitInterruption;
-        IDT_VECTORING IdtVectoring;
+        EXIT_INTERRUPTION Exit;
+        IDT_VECTORING Interrupt;
         INSTRUCTION Instruction;
-        u64 InstructionLength;
+        u64 Length;
         QUALIFICATION Qualification;
         b Injected;
     } GUEST_STATE, *PGUEST_STATE;
 
-    typedef struct _CCB {
+#define EPT_CAP_R               (1ull << 0)
+#define EPT_CAP_W               (1ull << 1)
+#define EPT_CAP_X               (1ull << 2)
+#define EPT_CAP_GAW21           (1ull << 3)
+#define EPT_CAP_GAW30           (1ull << 4)
+#define EPT_CAP_GAW39           (1ull << 5)
+#define EPT_CAP_GAW48           (1ull << 6)
+#define EPT_CAP_GAW57           (1ull << 7)
+
+#define EPT_CAP_UC              (1ull << 8)
+#define EPT_CAP_WC              (1ull << 9)
+#define EPT_CAP_WT              (1ull << 12)
+#define EPT_CAP_WP              (1ull << 13)
+#define EPT_CAP_WB              (1ull << 14)
+
+#define EPT_CAP_SP2M            (1ull << 16)
+#define EPT_CAP_SP1G            (1ull << 17)
+#define EPT_CAP_SP512G          (1ull << 18)
+#define EPT_CAP_SP256T          (1ull << 19)
+
+#define EPT_CAP_INVEPT          (1ull << 20)
+#define EPT_CAP_INVEPT_IA       (1ull << 24)
+#define EPT_CAP_INVEPT_CW       (1ull << 25)
+#define EPT_CAP_INVEPT_AC       (1ull << 26)
+
+#define EPT_CAP_INVVPID         (1ull << 32)
+#define EPT_CAP_INVVPID_IA      (1ull << 40)
+#define EPT_CAP_INVVPID_CW      (1ull << 41)
+#define EPT_CAP_INVVPID_AC      (1ull << 42)
+#define EPT_CAP_INVVPID_CWPG    (1ull << 43)
+
+#define INVALID_EPTP            (~0ull)
+
+#define EPT_UNSUPPORTED_FEATURES \
+        (EPT_CAP_SP2M | EPT_CAP_SP1G | EPT_CAP_SP512G | EPT_CAP_SP256T)
+
+#define EPT_INVEPT_SINGLE_CONTEXT 1
+#define EPT_INVEPT_ALL_CONTEXT    2
+
+    //
+    // Memory range types
+    //
+
+    typedef enum _MTRR_ATTRIBUTE {
+        MTRR_TYPE_UNCACHEABLE = 0,
+        MTRR_TYPE_WRITE_COMBINING = 1,
+        MTRR_TYPE_WRITE_THROUGH = 4,
+        MTRR_TYPE_WRITE_PROTECT = 5,
+        MTRR_TYPE_WRITE_BACK = 6,
+        MTRR_TYPE_MAX
+    }MTRR_ATTRIBUTE, *PMTRR_ATTRIBUTE;
+
+    //
+    // MTRR specific registers - capability register, default
+    // register, and variable mask and base register
+    //
+
+    typedef union _MTRR_CAPABILITIES {
+        u64 Alignment;
+
+        struct {
+            u64 VarCnt : 8;
+            u64 FixSupported : 1;
+            u64 Reserved_0 : 1;
+            u64 UswcSupported : 1;
+            u64 Reserved_1 : 21;
+            u64 Reserved_2;
+        };
+    } MTRR_CAPABILITIES, *PMTRR_CAPABILITIES;
+
+    typedef union _MTRR_DEFAULT {
+        u64 Alignment;
+
+        struct {
+            u64 Type : 8;
+            u64 Reserved_0 : 2;
+            u64 FixedEnabled : 1;
+            u64 MtrrEnabled : 1;
+            u64 Reserved_1 : 20;
+            u64 Reserved_2;
+        };
+    } MTRR_DEFAULT, *PMTRR_DEFAULT;
+
+    typedef union _MTRR_VARIABLE_BASE {
+        u64 Alignment;
+
+        struct {
+            u64 Type : 8;
+            u64 Reserved_0 : 4;
+            u64 PhysBase_1 : 20;
+            u64 PhysBase_2 : 4;
+            u64 PhysBase_3 : 4;
+            u64 Reserved_1 : 24;
+        };
+    } MTRR_VARIABLE_BASE, *PMTRR_VARIABLE_BASE;
+
+    typedef union _MTRR_VARIABLE_MASK {
+        u64 Alignment;
+
+        struct {
+            u64 Reserved_0 : 11;
+            u64 Valid : 1;
+            u64 PhysMask_1 : 20;
+            u64 PhysMask_2 : 4;
+            u64 PhysMask_3 : 4;
+            u64 Reserved_1 : 24;
+        };
+    } MTRR_VARIABLE_MASK, *PMTRR_VARIABLE_MASK;
+
+    //
+    // Range in specific mtrr terms
+    //
+
+    typedef struct _MTRR_RANGE {
+        MTRR_VARIABLE_BASE Base;
+        MTRR_VARIABLE_MASK Mask;
+    } MTRR_RANGE, *PMTRR_RANGE;
+
+    //
+    // Range in generic terms
+    //
+
+    typedef struct _ONE_RANGE {
+        u64 Base;
+        u64 Limit;
+        u8 Type;
+    } ONE_RANGE, *PONE_RANGE;
+
+    //
+    // System static information concerning cached range types
+    //
+
+    typedef struct _RANGE_INFO {
+        MTRR_DEFAULT Default; // h/w mtrr default
+        MTRR_CAPABILITIES Capabilities; // h/w mtrr Capabilities
+        u8 DefaultCachedType; // default type for MmCached
+        u8 MaxRange; // Max size of Ranges
+        ONE_RANGE Ranges[]; // Current ranges as set into h/w
+    } RANGE_INFO, *PRANGE_INFO;
+
+#define PER_PAGE 512
+
+    //
+    // Define various memory page boundaries
+    //
+#define _1MB    ((1 * 1024 * 1024) >> PAGE_SHIFT)  
+#define _2MB    (2 * _1MB)
+#define _4MB    (4 * _1MB)
+#define _8MB    (8 * _1MB)
+#define _12MB   (12 * _1MB)
+#define _16MB   (16 * _1MB)
+#define _24MB   (24 * _1MB)
+#define _32MB   (32 * _1MB)
+#define _48MB   (48 * _1MB)
+#define _64MB   (64 * _1MB)
+#define _80MB   (80 * _1MB)
+#define _96MB   (96 * _1MB)
+#define _128MB  (128 * _1MB)
+#define _256MB  (256 * _1MB)
+#define _512MB  (512 * _1MB)
+#define _1024MB (1024 * _1MB)
+#define _2048MB (2048 * _1MB)
+#define _4096MB (4096 * _1MB)
+
+    // See Table 24-8. Format of Extended-Page-Table Pointer
+    typedef union _EPTP {
+        u64 Alignment;
+
+        struct {
+            u64 Psmt : 3; // bit 2:0 (0 = Uncacheable (UC) ¡ª 6 = Write ¡ª back(WB)) 
+            u64 Pwl : 3; // bit 5:3 (This value is 1 less than the EPT page-walk length) 
+            u64 Ad : 1; // bit 6 (Setting this control to 1 enables accessed and dirty flags for EPT) 
+            u64 Reserved1 : 5; // bit 11:7 
+            u64 PageFrameNumber : 36;
+            u64 Reserved2 : 16;
+        };
+    }EPTP, *PEPTP;
+
+    // See Table 28-1. 
+    typedef union _EPT_PML4E {
+        u64 Alignment;
+
+        struct {
+            u64 Read : 1; // bit 0 
+            u64 Write : 1; // bit 1 
+            u64 Execute : 1; // bit 2 
+            u64 Reserved1 : 5; // bit 7:3 (Must be Zero) 
+            u64 Accessed : 1; // bit 8 
+            u64 Ignored1 : 1; // bit 9 
+            u64 Global : 1; // bit 10 
+            u64 Ignored2 : 1; // bit 11 
+            u64 PageFrameNumber : 36; // bit (N-1):12 or Page-Frame-Number 
+            u64 Reserved2 : 4; // bit 51:N 
+            u64 Ignored3 : 12; // bit 63:52 
+        };
+    }EPT_PML4E, *PEPT_PML4E;
+
+    // See Table 28-3
+    typedef union _EPT_PDPTE {
+        u64 Alignment;
+
+        struct {
+            u64 Read : 1; // bit 0 
+            u64 Write : 1; // bit 1 
+            u64 Execute : 1; // bit 2 
+            u64 Reserved1 : 5; // bit 7:3 (Must be Zero) 
+            u64 Accessed : 1; // bit 8 
+            u64 Ignored1 : 1; // bit 9 
+            u64 Global : 1; // bit 10 
+            u64 Ignored2 : 1; // bit 11 
+            u64 PageFrameNumber : 36; // bit (N-1):12 or Page-Frame-Number 
+            u64 Reserved2 : 4; // bit 51:N 
+            u64 Ignored3 : 12; // bit 63:52 
+        };
+    }EPT_PDPTE, *PEPT_PDPTE;
+
+    // See Table 28-5
+    typedef union _EPT_PDE {
+        u64 Alignment;
+
+        struct {
+            u64 Read : 1; // bit 0 
+            u64 Write : 1; // bit 1 
+            u64 Execute : 1; // bit 2         
+            u64 Type : 3; // bit 5:3 (EPT Memory type) 
+            u64 Pat : 1; // bit 6 
+            u64 Large : 1; // bit 7 
+            u64 Accessed : 1; // bit 8 
+            u64 Ignored1 : 1; // bit 9 
+            u64 Global : 1; // bit 10 
+            u64 Ignored2 : 1; // bit 11 
+            u64 PageFrameNumber : 36; // bit (N-1):12 or Page-Frame-Number 
+            u64 Reserved2 : 4; // bit 51:N 
+            u64 Ignored3 : 12; // bit 63:52 
+        };
+    }EPT_PDE, *PEPT_PDE;
+
+    // See Table 28-6
+    typedef union _EPT_PTE {
+        u64 Alignment;
+
+        struct {
+            u64 Read : 1; // bit 0 
+            u64 Write : 1; // bit 1 
+            u64 Execute : 1; // bit 2 
+            u64 Mt : 3; // bit 5:3 (EPT Memory type) 
+            u64 Pat : 1; // bit 6 
+            u64 Ignored1 : 1; // bit 7 
+            u64 Accessed : 1; // bit 8 
+            u64 Dirty : 1; // bit 9 
+            u64 Global : 1; // bit 10 
+            u64 Ignored2 : 1; // bit 11 
+            u64 PageFrameNumber : 36; // bit (N-1):12 or Page-Frame-Number 
+            u64 Reserved : 4; // bit 51:N 
+            u64 Ignored3 : 11; // bit 62:52 
+            u64 SuppressVE : 1; // bit 63 
+        };
+    }EPT_PTE, *PEPT_PTE;
+
+    typedef struct _VMX_VMCS {
+        u32 Identifier;
+        u32 Abort;
+        u8 Data[PAGE_SIZE - 8];
+    } VMX_VMCS, *PVMX_VMCS;
+
+    // read 0x00000000 - 0x00001FFF 0 ~ 1023
+    // read 0xC0000000 - 0xC0001FFF 1024 ~ 2047
+#define EnableMsrRead(bitmap, bit) \
+            (*((u8ptr)(bitmap) + \
+                (((bit) & 0xC0000000) ? 0x400 : 0) + \
+                    (((bit) & 0x1FFF) >> 3)) |= 1 << ((bit) & 7))
+
+    // write 0x00000000 - 0x00001FFF 2048 ~ 3071
+    // write 0xC0000000 - 0xC0001FFF 3072 ~ 4095
+#define EnableMsrWrite(bitmap, bit) \
+            (*((u8ptr)(bitmap) + \
+                (((bit) & 0xC0000000) ? 0xc00 : 0x800) + \
+                    (((bit) & 0x1FFF) >> 3)) |= 1 << ((bit) & 7))
+
+#define EnableMsr(bitmap, bit)  \
+            EnableMsrRead(bitmap, bit), EnableMsrWrite(bitmap, bit)
+
+    // core & thread state block
+    typedef struct _TSB {
         DECLSPEC_ALIGN(PAGE_SIZE) struct {
             u8 KernelStack[KERNEL_LARGE_STACK_SIZE - sizeof(REGISTERS_FRAME)];
             REGISTERS_FRAME Registers;
         };
 
-        DECLSPEC_ALIGN(PAGE_SIZE) struct {
-            VMX_VMCS VmsSupport;
+        struct {
+            VMX_VMCS Support;
             VMX_VMCS Vmcs;
-            u8 Bitmap[PAGE_SIZE];
+        } Region;
+
+        PHYSICAL_ADDRESS Support;
+        PHYSICAL_ADDRESS Vmcs;
+
+        ULARGE_INTEGER Cr0;
+        ULARGE_INTEGER Cr0Fixed;
+        ULARGE_INTEGER Cr0Mask;
+        ULARGE_INTEGER Cr0ReadShadow;
+
+        ULARGE_INTEGER Cr4;
+        ULARGE_INTEGER Cr4Fixed;
+        ULARGE_INTEGER Cr4Mask;
+        ULARGE_INTEGER Cr4ReadShadow;
+
+        GUEST_STATE GuestState;
+
+        u Number;
+
+        struct _CSB * Csb;
+    }TSB, *PTSB;
+
+    // cpu state block
+    typedef struct _CSB {
+        DECLSPEC_ALIGN(PAGE_SIZE) struct {
+            u8 MsrBitmap[PAGE_SIZE];
+
+            struct {
+                u64 Pml4e[PER_PAGE];
+                u64 Pdpte[PER_PAGE];
+                u64 Pde[PER_PAGE * PER_PAGE];
+            };
         }Region;
+
+        PHYSICAL_ADDRESS MsrBitmap;
+        PHYSICAL_ADDRESS EptPml4e;
 
         ULARGE_INTEGER ExceptionBitmap;
 
-        CPU_FEATURE Feature;
-        VMX_INFO VmxInfo;
+        CPU_FEATURE CpuFeature;
+        VMX_CONTROLS Controls;
 
-        PHYSICAL_ADDRESS VmsSupport;
-        PHYSICAL_ADDRESS Vmcs;
-        PHYSICAL_ADDRESS Bitmap;
+        struct _RANGE_INFO * RangeInfo;
 
-        GUEST_STATE GuestState;
-    }CCB, *PCCB;
+        struct _TSB Tsb[];
+    }CSB, *PCSB;
 
-    typedef
-        void
-        (NTAPI * PEXIT_HANDLER)(
-            __inout PCCB Block
-            );
-
-    u32
+    // asm
+    void
         NTAPI
-        __ops_segment_limit(
-            __in u32 Selector
+        ReadCpuFeature(
+            __in PCPU_FEATURE CpuFeature
         );
 
-    u32
+    // asm
+    void
         NTAPI
-        __ops_segment_ar(
-            __in u32 Selector
+        CaptureRegisters(
+            __out PREGISTERS_FRAME Registers
+        );
+
+    // asm
+    void
+        NTAPI
+        RestoreRegisters(
+            __in PREGISTERS_FRAME Registers
+        );
+
+    // asm
+    void
+        NTAPI
+        __vmx_trap(
+            void
+        );
+
+    // asm
+    status
+        NTAPI
+        __vmx_start(
+            __inout struct _TSB * Tsb
+        );
+
+    VMX_RESULT
+        NTAPI
+        __vmx_vmread_common(
+            __in u Field,
+            __out u64 * Value
+        );
+
+    VMX_RESULT
+        NTAPI
+        __vmx_vmwrite_common(
+            __in u Field,
+            __in u64 Value
         );
 
     void
         NTAPI
-        __vmx_vmentry(
-            void
-        );
-
-    status
-        NTAPI
-        __vmx_start(
-            __in PCCB Block
+        __vmx_prepare_segment(
+            __in PKDESCRIPTOR Descriptor,
+            __in UINT16 Selector,
+            __out PVMX_GDTENTRY VmxGdtEntry
         );
 
     status
@@ -1863,7 +2008,7 @@ extern "C" {
     void
         NTAPI
         VmxStartAllProcessors(
-            __in PCCB * Block
+            __inout struct _CSB ** Csb
         );
 
 #ifdef __cplusplus

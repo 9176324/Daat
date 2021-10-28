@@ -66,5 +66,8 @@
     <ClInclude Include="VmxHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Intrin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

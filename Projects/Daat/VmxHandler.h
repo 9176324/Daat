@@ -3,7 +3,7 @@
 * Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
-* 2.0 (the "License"); you may not use this file except in compliance with
+* 2.0 (the "License") you may not use this file except in compliance with
 * the License. You may obtain a copy of the License at
 * http://www.mozilla.org/MPL/
 *
@@ -24,52 +24,57 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-    typedef struct _CPUINFO {
-        u32 Eax;
-        u32 Ebx;
-        u32 Ecx;
-        u32 Edx;
-    } CPUINFO, *PCPUINFO;
-
-    typedef struct _CCB * PCCB;
-
-    void
-        NTAPI
-        __ops_cpuid(
-            __in s32 Function,
-            __in s32 SubFunction,
-            __out PCPUINFO CpuInfo
-        );
-
-    void
-        NTAPI
-        __ops_invd(
+    typedef
+        void
+        (NTAPI * INTERRUPT_HANDLER) (
             void
-        );
+            );
 
-    u64
-        NTAPI
-        __ops_rdtsc(
-            void
-        );
+    typedef struct _INTERRUPTION_FRAME {
+        u ProgramCounter;
+        u SegCs;
+        u Eflags;
+    }INTERRUPTION_FRAME, *PINTERRUPTION_FRAME;
 
-    u64
+    typedef union _INTERRUPT_ADDRESS {
+        struct {
+#ifndef _WIN64
+            u16 Offset;
+            u16 ExtendedOffset;
+#else
+            u16 OffsetLow;
+            u16 OffsetMiddle;
+            u32 OffsetHigh;
+#endif // !_WIN64
+        };
+
+        u Address;
+    } INTERRUPT_ADDRESS, *PINTERRUPT_ADDRESS;
+
+#ifdef _WIN64
+    void
         NTAPI
-        __ops_rdtscp(
-            __out u32ptr Aux
+        __monitor_patch_guard(
+            __inout struct _TSB * Tsb
         );
+#endif // _WIN64
 
     void
         NTAPI
-        __ops_xsetbv(
-            __in u32 Xcr,
-            __in u64 Value
+        __vmx_print_interrupt(
+            __inout struct _TSB * Tsb
         );
+
+    typedef
+        void
+        (NTAPI * PVMHANDLER)(
+            __inout struct _TSB * Block
+            );
 
     void
         NTAPI
         __inject_exception(
-            __inout PCCB Block,
+            __inout struct _TSB * Tsb,
             __in u64 Vector,
             __in_opt u64 ErrorCode,
             __in u64 Type

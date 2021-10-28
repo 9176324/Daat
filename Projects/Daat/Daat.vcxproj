@@ -110,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Daat.h" />
+    <ClInclude Include="Intrin.h" />
     <ClInclude Include="Vmx.h" />
     <ClInclude Include="VmxHandler.h" />
   </ItemGroup>

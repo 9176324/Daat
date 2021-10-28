@@ -20,24 +20,30 @@
 
 #include "VmxHandler.h"
 
-#include "Vmx.h"
+#include "Intrin.h"
+#include "Vmx.h"     
 
 #ifdef _WIN64
 void
 NTAPI
 __monitor_patch_guard(
-    __inout PCCB Block
+    __inout struct _TSB * Tsb
 )
 {
     // patchguard code clear dr7
 
     if (0x10f ==
-        __rdu16(Block->GuestState.GuestRip
-            + Block->GuestState.InstructionLength)) {
+        __rdu16(Tsb->GuestState.GuestRip
+            + Tsb->GuestState.Length)) {
         // restore idt
 
-        __vmx_vmwrite_common(GUEST_IDTR_BASE, (u64)Block->Registers.Idtr.Base);
-        __vmx_vmwrite_common(GUEST_IDTR_LIMIT, Block->Registers.Idtr.Limit);
+        __vmx_vmwrite_common(
+            GUEST_IDTR_BASE,
+            (u64)Tsb->Registers.Idtr.Base);
+
+        __vmx_vmwrite_common(
+            GUEST_IDTR_LIMIT,
+            Tsb->Registers.Idtr.Limit);
 
         // KiDispatchException
 
@@ -50,14 +56,18 @@ __monitor_patch_guard(
         //     ContextRecord.Rip -= 1;
         // }
 
-        Block->GuestState.GuestRip += 1;
+        Tsb->GuestState.GuestRip += 1;
 
-        __inject_exception(Block, VECTOR_BP, NO_ERROR_CODE, EXCEPTION);
+        __inject_exception(
+            Tsb,
+            VECTOR_BP,
+            NO_ERROR_CODE,
+            EXCEPTION);
 
         // use hardware breakpoint set dr0
 
-        // __ops_writedr(0, Block->GuestState.GuestRip + Block->GuestState.InstructionLength);
-        // __ops_writedr(6, DR6_SETBITS | (1 << 0));
+        // __ins_writedr(0, Tsb->GuestState.GuestRip + Tsb->GuestState.Length);
+        // __ins_writedr(6, DR6_SETBITS | (1 << 0));
         // __vmx_vmwrite_common(GUEST_DR7, DR7_SETBITS | (1 << 0));
     }
 }
@@ -65,8 +75,60 @@ __monitor_patch_guard(
 
 void
 NTAPI
+__vmx_print_interrupt(
+    __inout struct _TSB * Tsb
+)
+{
+    INTERRUPT_ADDRESS InterruptAddress = { 0 };
+    u32 Index = 0;
+    u32 Count = 0;
+
+#ifndef _WIN64
+    PKIDTENTRY IdtEntry = NULL;
+#else
+    PKIDTENTRY64 IdtEntry = NULL;
+#endif // !_WIN64
+
+#ifdef DEBUG
+    vDbgPrint(
+        "[Daat] < %04x : %p >\n",
+        Tsb->Registers.Idtr.Limit,
+        Tsb->Registers.Idtr.Base);
+#endif // DEBUG
+
+    IdtEntry = (ptr)(u)Tsb->Registers.Idtr.Base;
+
+#ifndef _WIN64
+    Count = (Tsb->Registers.Idtr.Limit + 1) / sizeof(KIDTENTRY);
+#else
+    Count = (Tsb->Registers.Idtr.Limit + 1) / sizeof(KIDTENTRY64);
+#endif // !_WIN64
+
+    for (Index = 0;
+        Index < Count;
+        Index++) {
+#ifndef _WIN64
+        InterruptAddress.Offset = IdtEntry[Index].Offset;
+        InterruptAddress.ExtendedOffset = IdtEntry[Index].ExtendedOffset;
+#else
+        InterruptAddress.OffsetLow = IdtEntry[Index].OffsetLow;
+        InterruptAddress.OffsetMiddle = IdtEntry[Index].OffsetMiddle;
+        InterruptAddress.OffsetHigh = IdtEntry[Index].OffsetHigh;
+#endif // !_WIN64
+
+#ifdef DEBUG
+        vDbgPrint(
+            "[Daat] %04x : %p\n",
+            Index,
+            InterruptAddress.Address);
+#endif // DEBUG
+    }
+}
+
+void
+NTAPI
 __inject_exception(
-    __inout PCCB Block,
+    __inout struct _TSB * Tsb,
     __in u64 Vector,
     __in_opt u64 ErrorCode,
     __in u64 Type
@@ -74,58 +136,67 @@ __inject_exception(
 {
     __vmx_vmread_common(
         VM_EXIT_INFO_IDT_VECTORING,
-        &Block->GuestState.IdtVectoring);
+        &Tsb->GuestState.Interrupt);
 
-    if (0 != Block->GuestState.IdtVectoring.Valid) {
+    if (0 != Tsb->GuestState.Interrupt.Valid) {
         // check whether the pending vector and injecting vector can generate a double fault
 
-        Block->GuestState.EntryInterruption.Vector = VECTOR_DF;
+        Tsb->GuestState.Entry.Vector = VECTOR_DF;
     }
     else {
-        Block->GuestState.EntryInterruption.Vector = Vector;
+        Tsb->GuestState.Entry.Vector = Vector;
     }
 
-    Block->GuestState.EntryInterruption.Type = Type;
-    Block->GuestState.EntryInterruption.Valid = 1;
+    Tsb->GuestState.Entry.Type = Type;
+    Tsb->GuestState.Entry.Valid = 1;
 
     if (NO_ERROR_CODE != ErrorCode) {
-        Block->GuestState.EntryInterruption.DeliverErrorCode = 1;
+        Tsb->GuestState.Entry.DeliverErrorCode = 1;
 
-        __vmx_vmwrite(
+        __ins_vmx_vmwrite(
             VMX_ENTRY_EXCEPTION_ERROR_CODE,
             ErrorCode);
     }
 
-    Block->GuestState.EntryInterruption.Information &= 0x00000000FFFFFFFFULL;
+    Tsb->GuestState.Entry.Information &= 0x00000000ffffffffull;
 
     __vmx_vmwrite_common(
         VMX_ENTRY_INTERRUPT_INFO,
-        Block->GuestState.EntryInterruption.Information);
+        Tsb->GuestState.Entry.Information);
 
-    __vmx_vmwrite(
+    __ins_vmx_vmwrite(
         VMX_ENTRY_INSTRUCTION_LENGTH,
-        Block->GuestState.InstructionLength);
+        Tsb->GuestState.Length);
+}
+
+void
+NTAPI
+__vm_null(
+    __inout PTSB Tsb
+)
+{
+
 }
 
 void
 NTAPI
 __vm_exception_nmi(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
     u64 ErrorCode = NO_ERROR_CODE;
 
     __vmx_vmread_common(
         VM_EXIT_INFO_INTERRUPT_INFO,
-        &Block->GuestState.ExitInterruption.Information);
+        &Tsb->GuestState.Exit.Alignment);
 
-    if (0 != Block->GuestState.ExitInterruption.ErrorCode) {
+    if (0 != Tsb->GuestState.Exit.ErrorCode) {
         __vmx_vmread_common(
             VM_EXIT_INFO_EXCEPTION_ERROR_CODE,
             &ErrorCode);
     }
 
-    switch (Block->GuestState.ExitInterruption.Vector) {
+    switch (Tsb->GuestState.Exit.Vector) {
     case VECTOR_NMI: {
         break;
     }
@@ -145,25 +216,16 @@ __vm_exception_nmi(
     }
 
     __inject_exception(
-        Block,
-        Block->GuestState.ExitInterruption.Vector,
+        Tsb,
+        Tsb->GuestState.Exit.Vector,
         ErrorCode,
-        Block->GuestState.ExitInterruption.Type);
+        Tsb->GuestState.Exit.Type);
 }
 
 void
 NTAPI
 __vm_interrupt(
-    __inout PCCB Block
-)
-{
-
-}
-
-void
-NTAPI
-__vm_null(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
 
@@ -172,79 +234,79 @@ __vm_null(
 void
 NTAPI
 __vm_cpuid(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
     CPUINFO CpuInfo = { 0 };
 
-    __ops_cpuid(
-        Block->Registers.Eax,
-        Block->Registers.Ecx,
+    __ins_cpuid(
+        Tsb->Registers.Eax,
+        Tsb->Registers.Ecx,
         &CpuInfo);
 
-    if (1 == Block->Registers.Eax &&
-        0 == Block->Registers.Ecx) {
+    if (1 == Tsb->Registers.Eax &&
+        0 == Tsb->Registers.Ecx) {
         CpuInfo.Ecx &= ~(1UL << 5);
     }
 
 #ifndef _WIN64
-    Block->Registers.Eax = CpuInfo.Eax;
-    Block->Registers.Ebx = CpuInfo.Ebx;
-    Block->Registers.Ecx = CpuInfo.Ecx;
-    Block->Registers.Edx = CpuInfo.Edx;
+    Tsb->Registers.Eax = CpuInfo.Eax;
+    Tsb->Registers.Ebx = CpuInfo.Ebx;
+    Tsb->Registers.Ecx = CpuInfo.Ecx;
+    Tsb->Registers.Edx = CpuInfo.Edx;
 #else
-    Block->Registers.Rax = CpuInfo.Eax;
-    Block->Registers.Rbx = CpuInfo.Ebx;
-    Block->Registers.Rcx = CpuInfo.Ecx;
-    Block->Registers.Rdx = CpuInfo.Edx;
+    Tsb->Registers.Rax = CpuInfo.Eax;
+    Tsb->Registers.Rbx = CpuInfo.Ebx;
+    Tsb->Registers.Rcx = CpuInfo.Ecx;
+    Tsb->Registers.Rdx = CpuInfo.Edx;
 #endif // !_WIN64
 }
 
 void
 NTAPI
 __vm_invd(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
-    __ops_invd();
+    __ins_invd();
 }
 
 void
 NTAPI
 __vm_rdtsc(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
     ULARGE_INTEGER Tsc = { 0 };
 
-    Tsc.QuadPart = __ops_rdtsc();
+    Tsc.QuadPart = __ins_rdtsc();
 
 #ifndef _WIN64
-    Block->Registers.Eax = Tsc.LowPart;
-    Block->Registers.Edx = Tsc.HighPart;
+    Tsb->Registers.Eax = Tsc.LowPart;
+    Tsb->Registers.Edx = Tsc.HighPart;
 #else
-    Block->Registers.Rax = Tsc.LowPart;
-    Block->Registers.Rdx = Tsc.HighPart;
+    Tsb->Registers.Rax = Tsc.LowPart;
+    Tsb->Registers.Rdx = Tsc.HighPart;
 #endif // !_WIN64
 }
 
 void
 NTAPI
 __vm_vmx(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
-    __vmx_vmread_common(GUEST_RFLAGS, &Block->GuestState.GuestRFlags);
+    __vmx_vmread_common(GUEST_RFLAGS, &Tsb->GuestState.GuestRFlags);
 
-    Block->GuestState.GuestRFlags |= EFLAGS_ZF | EFLAGS_CF;
+    Tsb->GuestState.GuestRFlags |= EFLAGS_ZF | EFLAGS_CF;
 
-    __vmx_vmwrite_common(GUEST_RFLAGS, Block->GuestState.GuestRFlags);
+    __vmx_vmwrite_common(GUEST_RFLAGS, Tsb->GuestState.GuestRFlags);
 }
 
 void
 NTAPI
 __vm_cr_access(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
     u *Cr = NULL;
@@ -252,19 +314,19 @@ __vm_cr_access(
 
     __vmx_vmread_common(
         VM_EXIT_INFO_QUALIFICATION,
-        &Block->GuestState.Qualification);
+        &Tsb->GuestState.Qualification);
 
-    Cr = Block->Registers.Cr + Block->GuestState.Qualification.CR.Number;
-    GpReg = Block->Registers.Reg + Block->GuestState.Qualification.CR.GpReg;
+    Cr = Tsb->Registers.Cr + Tsb->GuestState.Qualification.CR.Number;
+    GpReg = Tsb->Registers.Reg + Tsb->GuestState.Qualification.CR.GpReg;
 
-    if (0 != Block->GuestState.Qualification.CR.Type) {
+    if (0 != Tsb->GuestState.Qualification.CR.Type) {
         // MOV from CR
 
-        __vmx_vmread_common(GUEST_CR0, &Block->Registers.Cr0);
-        __vmx_vmread_common(GUEST_CR3, &Block->Registers.Cr3);
-        __vmx_vmread_common(GUEST_CR4, &Block->Registers.Cr4);
+        __vmx_vmread_common(GUEST_CR0, &Tsb->Registers.Cr0);
+        __vmx_vmread_common(GUEST_CR3, &Tsb->Registers.Cr3);
+        __vmx_vmread_common(GUEST_CR4, &Tsb->Registers.Cr4);
 
-        Block->Registers.Cr2 = __ops_readcr(2);
+        Tsb->Registers.Cr2 = __ins_readcr(2);
 
         *GpReg = *Cr;
     }
@@ -273,51 +335,51 @@ __vm_cr_access(
 
         *Cr = *GpReg;
 
-        __vmx_vmwrite_common(GUEST_CR0, Block->Registers.Cr0);
-        __vmx_vmwrite_common(GUEST_CR3, Block->Registers.Cr3);
-        __vmx_vmwrite_common(GUEST_CR4, Block->Registers.Cr4);
+        __vmx_vmwrite_common(GUEST_CR0, Tsb->Registers.Cr0);
+        __vmx_vmwrite_common(GUEST_CR3, Tsb->Registers.Cr3);
+        __vmx_vmwrite_common(GUEST_CR4, Tsb->Registers.Cr4);
 
-        __ops_writecr(2, Block->Registers.Cr2);
+        __ins_writecr(2, Tsb->Registers.Cr2);
     }
 }
 
 void
 NTAPI
 __vm_dr_access(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
     u * DrReg = NULL;
     u * GpReg = NULL;
 
-    __vmx_vmread_common(GUEST_DR7, &Block->Registers.Dr7);
+    __vmx_vmread_common(GUEST_DR7, &Tsb->Registers.Dr7);
 
-    if (DR7_GD == (Block->Registers.Dr7 & DR7_GD)) {
-        Block->Registers.Dr6 = __ops_readdr(6);
+    if (DR7_GD == (Tsb->Registers.Dr7 & DR7_GD)) {
+        Tsb->Registers.Dr6 = __ins_readdr(6);
 
-        Block->Registers.Dr6 |= DR6_BD;
+        Tsb->Registers.Dr6 |= DR6_BD;
 
-        __ops_writedr(6, Block->Registers.Dr6);
+        __ins_writedr(6, Tsb->Registers.Dr6);
 
-        Block->Registers.Dr7 &= ~DR7_GD;
+        Tsb->Registers.Dr7 &= ~DR7_GD;
 
-        __vmx_vmwrite_common(GUEST_DR7, Block->Registers.Dr7);
+        __vmx_vmwrite_common(GUEST_DR7, Tsb->Registers.Dr7);
 
-        Block->GuestState.InstructionLength = 0;
+        Tsb->GuestState.Length = 0;
 
-        __inject_exception(Block, VECTOR_DB, NO_ERROR_CODE, EXCEPTION);
+        __inject_exception(Tsb, VECTOR_DB, NO_ERROR_CODE, EXCEPTION);
     }
     else {
         __vmx_vmread_common(
             VM_EXIT_INFO_QUALIFICATION,
-            &Block->GuestState.Qualification);
+            &Tsb->GuestState.Qualification);
 
-        if (4 == Block->GuestState.Qualification.DR.Number ||
-            5 == Block->GuestState.Qualification.DR.Number) {
-            if (CR4_DE == (Block->Registers.Cr4 & CR4_DE)) {
-                Block->GuestState.InstructionLength = 0;
+        if (4 == Tsb->GuestState.Qualification.DR.Number ||
+            5 == Tsb->GuestState.Qualification.DR.Number) {
+            if (CR4_DE == (Tsb->Registers.Cr4 & CR4_DE)) {
+                Tsb->GuestState.Length = 0;
 
-                __inject_exception(Block, VECTOR_UD, NO_ERROR_CODE, EXCEPTION);
+                __inject_exception(Tsb, VECTOR_UD, NO_ERROR_CODE, EXCEPTION);
 
                 return;
             }
@@ -325,21 +387,18 @@ __vm_dr_access(
                 // Dr4 <==> Dr6
                 // Dr5 <==> Dr7
 
-                Block->GuestState.Qualification.DR.Number += 2;
+                Tsb->GuestState.Qualification.DR.Number += 2;
             }
         }
 
-        DrReg = Block->Registers.Dr + Block->GuestState.Qualification.DR.Number;
-        GpReg = Block->Registers.Reg + Block->GuestState.Qualification.DR.GpReg;
+        DrReg = Tsb->Registers.Dr + Tsb->GuestState.Qualification.DR.Number;
+        GpReg = Tsb->Registers.Reg + Tsb->GuestState.Qualification.DR.GpReg;
 
-        if (0 != Block->GuestState.Qualification.DR.Direction) {
+        if (0 != Tsb->GuestState.Qualification.DR.Direction) {
             // MOV DR -> GPR
 
-            if (7 != Block->GuestState.Qualification.DR.Number) {
-                *DrReg = __ops_readdr(Block->GuestState.Qualification.DR.Number);
-            }
-            else {
-                __vmx_vmread_common(GUEST_DR7, DrReg);
+            if (7 != Tsb->GuestState.Qualification.DR.Number) {
+                *DrReg = __ins_readdr(Tsb->GuestState.Qualification.DR.Number);
             }
 
             *GpReg = *DrReg;
@@ -349,16 +408,16 @@ __vm_dr_access(
 
             *DrReg = *GpReg;
 
-            if (7 != Block->GuestState.Qualification.DR.Number) {
-                __ops_writedr(
-                    Block->GuestState.Qualification.DR.Number,
+            if (7 != Tsb->GuestState.Qualification.DR.Number) {
+                __ins_writedr(
+                    Tsb->GuestState.Qualification.DR.Number,
                     *DrReg);
             }
             else {
-                __vmx_vmwrite_common(GUEST_DR7, Block->Registers.Dr7);
+                __vmx_vmwrite_common(GUEST_DR7, Tsb->Registers.Dr7);
 
-#ifdef _WIN64                                 
-                __monitor_patch_guard(Block);
+#ifdef _WIN64                              
+                // __monitor_patch_guard(Tsb);
 #endif // _WIN64
             }
         }
@@ -368,12 +427,12 @@ __vm_dr_access(
 void
 NTAPI
 __vm_msr_read(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
     ULARGE_INTEGER Msr = { 0 };
 
-    switch (Block->Registers.Ecx) {
+    switch (Tsb->Registers.Ecx) {
     case IA32_DEBUGCTL: {
         __vmx_vmread_common(GUEST_DEBUGCTL, &Msr.QuadPart);
 
@@ -411,40 +470,40 @@ __vm_msr_read(
     }
 
     case IA32_FEATURE_CONTROL: {
-        Msr.QuadPart = __ops_readmsr(Block->Registers.Ecx);
+        Msr.QuadPart = __ins_readmsr(Tsb->Registers.Ecx);
         Msr.QuadPart &= ~FC_LOCKED;
 
         break;
     }
 
     default: {
-        Msr.QuadPart = __ops_readmsr(Block->Registers.Ecx);
+        Msr.QuadPart = __ins_readmsr(Tsb->Registers.Ecx);
 
         break;
     }
     }
 
 #ifndef _WIN64
-    Block->Registers.Eax = Msr.LowPart;
-    Block->Registers.Edx = Msr.HighPart;
+    Tsb->Registers.Eax = Msr.LowPart;
+    Tsb->Registers.Edx = Msr.HighPart;
 #else
-    Block->Registers.Rax = Msr.LowPart;
-    Block->Registers.Rdx = Msr.HighPart;
+    Tsb->Registers.Rax = Msr.LowPart;
+    Tsb->Registers.Rdx = Msr.HighPart;
 #endif // !_WIN64
 }
 
 void
 NTAPI
 __vm_msr_write(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
     ULARGE_INTEGER Msr = { 0 };
 
-    Msr.LowPart = Block->Registers.Eax;
-    Msr.HighPart = Block->Registers.Edx;
+    Msr.LowPart = Tsb->Registers.Eax;
+    Msr.HighPart = Tsb->Registers.Edx;
 
-    switch (Block->Registers.Ecx) {
+    switch (Tsb->Registers.Ecx) {
     case IA32_DEBUGCTL: {
         __vmx_vmwrite_common(GUEST_DEBUGCTL, Msr.QuadPart);
 
@@ -487,7 +546,7 @@ __vm_msr_write(
     }
 
     default: {
-        __ops_writemsr(Block->Registers.Ecx, Msr.QuadPart);
+        __ins_writemsr(Tsb->Registers.Ecx, Msr.QuadPart);
 
         break;
     }
@@ -496,43 +555,94 @@ __vm_msr_write(
 
 void
 NTAPI
+__vm_mtf(
+    __inout PTSB Tsb
+)
+{
+
+}
+
+void
+NTAPI
+__vm_invept(
+    __inout PTSB Tsb
+)
+{
+    // __ins_invept();
+}
+
+void
+NTAPI
+__vm_invvpid(
+    __inout PTSB Tsb
+)
+{
+    // __ins_invvpid();
+}
+
+void
+NTAPI
+__vm_ept_violation(
+    __inout PTSB Tsb
+)
+{
+
+}
+
+void
+NTAPI
+__vm_ept_misconfig(
+    __inout PTSB Tsb
+)
+{
+    Tsb->GuestState.GuestRip += 1;
+
+    __inject_exception(
+        Tsb, 
+        VECTOR_BP, 
+        NO_ERROR_CODE,
+        EXCEPTION);
+}
+
+void
+NTAPI
 __vm_rdtscp(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
     ULARGE_INTEGER Tsc = { 0 };
     u32 Aux = 0;
 
-    Tsc.QuadPart = __ops_rdtscp(&Aux);
+    Tsc.QuadPart = __ins_rdtscp(&Aux);
 
 #ifndef _WIN64
-    Block->Registers.Eax = Tsc.LowPart;
-    Block->Registers.Edx = Tsc.HighPart;
+    Tsb->Registers.Eax = Tsc.LowPart;
+    Tsb->Registers.Edx = Tsc.HighPart;
 
-    Block->Registers.Ecx = Aux;
+    Tsb->Registers.Ecx = Aux;
 #else
-    Block->Registers.Rax = Tsc.LowPart;
-    Block->Registers.Rdx = Tsc.HighPart;
+    Tsb->Registers.Rax = Tsc.LowPart;
+    Tsb->Registers.Rdx = Tsc.HighPart;
 
-    Block->Registers.Rcx = Aux;
+    Tsb->Registers.Rcx = Aux;
 #endif // !_WIN64
 }
 
 void
 NTAPI
 __vm_xsetbv(
-    __inout PCCB Block
+    __inout PTSB Tsb
 )
 {
     ULARGE_INTEGER Xcr = { 0 };
 
-    Xcr.LowPart = Block->Registers.Eax;
-    Xcr.HighPart = Block->Registers.Edx;
+    Xcr.LowPart = Tsb->Registers.Eax;
+    Xcr.HighPart = Tsb->Registers.Edx;
 
-    __ops_xsetbv(Block->Registers.Ecx, Xcr.QuadPart);
+    __ins_xsetbv(Tsb->Registers.Ecx, Xcr.QuadPart);
 }
 
-PEXIT_HANDLER VmxHandlers[] = {
+PVMHANDLER VmxHandlers[] = {
     __vm_exception_nmi, // [VMX_EXIT_INT_EXCEPTION_NMI] An SW interrupt, exception or NMI has occurred
     __vm_interrupt, // [VMX_EXIT_EXT_INTERRUPT] An external interrupt has occurred
     __vm_null, // [VMX_EXIT_TRIPLE_FAULT] Triple fault occurred
@@ -573,7 +683,7 @@ PEXIT_HANDLER VmxHandlers[] = {
     __vm_null, // [VMX_EXIT_FAILED_VMENTER_MSR] VMENTER failed due to MSR loading
     __vm_null, // nothing
     __vm_null, // [VMX_EXIT_MWAIT]
-    __vm_null, // [VMX_EXIT_MTF_EXIT]
+    __vm_mtf, // [VMX_EXIT_MTF_EXIT]
     __vm_null, // nothing
     __vm_null, // [VMX_EXIT_MONITOR]
 
@@ -585,13 +695,13 @@ PEXIT_HANDLER VmxHandlers[] = {
     __vm_null, // [VMX_EXIT_VIRTUALIZED_EOI]
     __vm_null, // [VMX_EXIT_GDT_IDT_ACCESS]
     __vm_null, // [VMX_EXIT_LDT_TR_ACCESS]
-    __vm_null, // [VMX_EXIT_EPT_VIOLATION]
-    __vm_null, // [VMX_EXIT_EPT_MISCONFIG]
+    __vm_ept_violation, // [VMX_EXIT_EPT_VIOLATION]
+    __vm_ept_misconfig, // [VMX_EXIT_EPT_MISCONFIG]
 
-    __vm_vmx, // [VMX_EXIT_INVEPT]
+    __vm_null, // [VMX_EXIT_INVEPT]
     __vm_rdtscp, // [VMX_EXIT_RDTSCP]
     __vm_null, // [VMX_EXIT_VMX_TIMER_EXIT]
-    __vm_vmx, // [VMX_EXIT_INVVPID]
+    __vm_null, // [VMX_EXIT_INVVPID]
     __vm_null, // [VMX_EXIT_WBINVD]
     __vm_xsetbv, // [VMX_EXIT_XSETBV] // Guest executed XSETBV instruction
     __vm_null, // [VMX_EXIT_APIC_WRITE]
@@ -616,24 +726,19 @@ __vm_exit_dispatch(
     __inout PREGISTERS_FRAME Registers
 )
 {
-    PCCB CurrentBlock = NULL;
+    PTSB Tsb = NULL;
 
-    CurrentBlock = CONTAINING_RECORD(Registers, CCB, Registers);
+    Tsb = CONTAINING_RECORD(Registers, TSB, Registers);
 
-    __vmx_vmread_common(GUEST_RIP, &CurrentBlock->GuestState.GuestRip);
-    __vmx_vmread_common(VM_EXIT_INFO_REASON, &CurrentBlock->GuestState.Reason);
-    __vmx_vmread_common(VM_EXIT_INFO_INSTRUCTION_LENGTH, &CurrentBlock->GuestState.InstructionLength);
+    __vmx_vmread_common(GUEST_RIP, &Tsb->GuestState.GuestRip);
+    __vmx_vmread_common(VM_EXIT_INFO_REASON, &Tsb->GuestState.Reason);
+    __vmx_vmread_common(VM_EXIT_INFO_INSTRUCTION_LENGTH, &Tsb->GuestState.Length);
 
-    VmxHandlers[CurrentBlock->GuestState.Reason.BasicReason](CurrentBlock);
+    VmxHandlers[Tsb->GuestState.Reason.BasicReason](Tsb);
 
-    CurrentBlock->GuestState.GuestRip += CurrentBlock->GuestState.InstructionLength;
+    Tsb->GuestState.GuestRip += Tsb->GuestState.Length;
 
-    __vmx_vmwrite_common(GUEST_RIP, CurrentBlock->GuestState.GuestRip);
-
-    // __vmx_vmwrite_common(GUEST_GDTR_BASE, (u64)CurrentBlock->Registers.Gdtr.Base);
-    // __vmx_vmwrite_common(GUEST_GDTR_LIMIT, CurrentBlock->Registers.Gdtr.Limit);
-    // __vmx_vmwrite_common(GUEST_IDTR_BASE, (u64)CurrentBlock->Registers.Idtr.Base);
-    // __vmx_vmwrite_common(GUEST_IDTR_LIMIT, CurrentBlock->Registers.Idtr.Limit);
+    __vmx_vmwrite_common(GUEST_RIP, Tsb->GuestState.GuestRip);
 
     RestoreRegisters(Registers);
 }
